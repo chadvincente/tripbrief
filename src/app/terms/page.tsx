@@ -106,7 +106,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">9. Contact Information</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                If you have any questions about these Terms of Service, please contact us at: [Your Contact Email]
+                If you have any questions about these Terms of Service, please contact us at: support@tripbrief.io
               </p>
             </section>
           </div>

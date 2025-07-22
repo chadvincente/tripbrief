@@ -49,9 +49,9 @@ export default function PrivacyPolicy() {
               
               <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Third-Party Services We Use</h3>
               <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4">
-                <li><strong>Anthropic AI:</strong> Your search queries are sent to Anthropic&apos;s API to generate travel briefs</li>
-                <li><strong>Umami Analytics:</strong> Privacy-focused analytics that don&apos;t use cookies or track personal data</li>
-                <li><strong>Vercel:</strong> Web hosting and serverless functions (may process technical data)</li>
+                <li><strong>AI Services:</strong> Your search queries are sent to third-party AI providers to generate travel briefs</li>
+                <li><strong>Analytics Providers:</strong> Privacy-focused analytics services that don&apos;t use cookies or track personal data</li>
+                <li><strong>Hosting Services:</strong> Web hosting and cloud infrastructure providers (may process technical data)</li>
               </ul>
 
               <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Data Sharing Policy</h3>
@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
                 TripBrief uses minimal tracking technologies:
               </p>
               <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4">
-                <li><strong>No Cookies:</strong> Our analytics (Umami) doesn&apos;t use cookies</li>
+                <li><strong>No Cookies:</strong> Our analytics platforms don&apos;t use cookies</li>
                 <li><strong>Local Storage:</strong> May be used for temporary data (like form inputs)</li>
                 <li><strong>Session Data:</strong> Temporary data for rate limiting (not persistent)</li>
               </ul>
@@ -122,7 +122,7 @@ export default function PrivacyPolicy() {
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">10. Contact Us</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
                 If you have any questions about this Privacy Policy or our data practices, please contact us at:
-                [Your Contact Email]
+                privacy@tripbrief.io
               </p>
             </section>
           </div>

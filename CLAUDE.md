@@ -90,7 +90,10 @@ Production includes IP-based rate limiting to protect against excessive API cost
 - Automatic cleanup of expired rate limit entries
 - Graceful error handling with retry information
 
-### Monitoring
+### Analytics & Monitoring
+- **Vercel Analytics**: Page views, performance metrics, custom events
+- **Umami Analytics**: Privacy-focused analytics without cookies
+- **Speed Insights**: Core Web Vitals and performance monitoring
 - API requests are logged with destination and IP for monitoring
 - Rate limit violations are tracked
 - Response times and errors are logged

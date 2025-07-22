@@ -12,13 +12,14 @@
     "prebuild": "npm run lint && npm run type-check"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "next": "^15.4.2",
     "react": "^18",
-    "react-dom": "^18",
-    "@anthropic-ai/sdk": "^0.32.1"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -26,6 +27,7 @@
     "eslint": "^8",
     "eslint-config-next": "^15.4.2",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }

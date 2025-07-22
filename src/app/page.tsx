@@ -5,6 +5,7 @@ import type { TravelBriefResponse } from '@/lib/anthropic'
 import TravelBriefCheatsheet from '@/components/TravelBriefCheatsheet'
 import TravelBriefText from '@/components/TravelBriefText'
 import Footer from '@/components/Footer'
+import { track } from '@vercel/analytics'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
@@ -29,15 +30,21 @@ export default function Home() {
     }
 
     try {
-      // Track the search event with Umami (only in production)
-      if (typeof window !== 'undefined' && window.umami) {
-        window.umami.track('travel-brief-search', {
-          destination: destination.trim(),
-          startDate: startDate || null,
-          endDate: endDate || null,
-          hasDateRange: !!(startDate && endDate)
-        })
+      // Track the search event with both analytics platforms
+      const searchData = {
+        destination: destination.trim(),
+        startDate: startDate || null,
+        endDate: endDate || null,
+        hasDateRange: !!(startDate && endDate)
       }
+
+      // Umami Analytics (custom analytics)
+      if (typeof window !== 'undefined' && window.umami) {
+        window.umami.track('travel-brief-search', searchData)
+      }
+
+      // Vercel Analytics (performance + events)
+      track('Travel Brief Generated', searchData)
 
       const response = await fetch('/api/generate-brief', {
         method: 'POST',
