@@ -20,8 +20,14 @@ npm start
 # Run linting
 npm run lint
 
+# Run linting with auto-fix
+npm run lint:fix
+
 # Type checking
 npm run type-check
+
+# Pre-build checks (linting + type checking)
+npm run prebuild
 ```
 
 ## Project Architecture

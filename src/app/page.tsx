@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { TravelBriefResponse } from '@/lib/anthropic'
 import TravelBriefCheatsheet from '@/components/TravelBriefCheatsheet'
 import TravelBriefText from '@/components/TravelBriefText'
+import Footer from '@/components/Footer'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,16 @@ export default function Home() {
     }
 
     try {
+      // Track the search event with Umami (only in production)
+      if (typeof window !== 'undefined' && window.umami) {
+        window.umami.track('travel-brief-search', {
+          destination: destination.trim(),
+          startDate: startDate || null,
+          endDate: endDate || null,
+          hasDateRange: !!(startDate && endDate)
+        })
+      }
+
       const response = await fetch('/api/generate-brief', {
         method: 'POST',
         headers: {
@@ -105,20 +116,21 @@ export default function Home() {
             )}
           </div>
         </main>
+        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
             TripBrief
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Get comprehensive travel information for any destination in seconds. 
-            From public transit to local culture, we've got you covered.
+            From public transit to local culture, we&apos;ve got you covered.
           </p>
         </div>
 
@@ -212,6 +224,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }
