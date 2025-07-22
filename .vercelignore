@@ -1,0 +1,5 @@
+# Vercel ignore file
+.env.local
+.env.example
+README.md
+CLAUDE.md
