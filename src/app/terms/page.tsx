@@ -1,3 +1,14 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Terms of Service - TripBrief',
+  description: 'Read TripBrief\'s Terms of Service including usage guidelines, information disclaimers, and acceptable use policies for our AI travel planning service.',
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
+
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">

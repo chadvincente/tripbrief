@@ -1,3 +1,14 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy - TripBrief',
+  description: 'Learn how TripBrief protects your privacy. We use cookie-free analytics and don\'t store personal data. Read our complete privacy policy.',
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
