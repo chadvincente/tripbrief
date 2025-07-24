@@ -21,7 +21,7 @@ interface PexelsResponse {
   total_results: number
 }
 
-interface CityImage {
+export interface CityImage {
   url: string
   photographer?: string
   photographer_url?: string
