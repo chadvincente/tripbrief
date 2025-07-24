@@ -1,0 +1,36 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:#87CEFA;stop-opacity:1" />
+<stop offset="100%" style="stop-color:#398EDB;stop-opacity:1" />
+</linearGradient>
+</defs>
+<rect width="800" height="400" fill="url(#skyGradient)"/>
+<!-- Buildings -->
+<rect x="50" y="200" width="80" height="200" fill="#4B5C68"/>
+<rect x="150" y="150" width="60" height="250" fill="#6B7380"/>
+<rect x="230" y="100" width="90" height="300" fill="#4B5C68"/>
+<rect x="340" y="80" width="70" height="320" fill="#6B7380"/>
+<rect x="430" y="120" width="100" height="280" fill="#4B5C68"/>
+<rect x="550" y="160" width="80" height="240" fill="#6B7380"/>
+<rect x="650" y="180" width="60" height="220" fill="#4B5C68"/>
+<rect x="730" y="220" width="70" height="180" fill="#6B7380"/>
+<!-- Windows -->
+<rect x="60" y="220" width="10" height="10" fill="#FFF9CA"/>
+<rect x="80" y="220" width="10" height="10" fill="#FFF9CA"/>
+<rect x="100" y="220" width="10" height="10" fill="#FFF9CA"/>
+<rect x="160" y="180" width="10" height="10" fill="#FFF9CA"/>
+<rect x="180" y="180" width="10" height="10" fill="#FFF9CA"/>
+<rect x="250" y="140" width="10" height="10" fill="#FFF9CA"/>
+<rect x="270" y="140" width="10" height="10" fill="#FFF9CA"/>
+<rect x="290" y="140" width="10" height="10" fill="#FFF9CA"/>
+<rect x="350" y="120" width="10" height="10" fill="#FFF9CA"/>
+<rect x="370" y="120" width="10" height="10" fill="#FFF9CA"/>
+<rect x="450" y="160" width="10" height="10" fill="#FFF9CA"/>
+<rect x="470" y="160" width="10" height="10" fill="#FFF9CA"/>
+<rect x="490" y="160" width="10" height="10" fill="#FFF9CA"/>
+<!-- Clouds -->
+<ellipse cx="150" cy="80" rx="40" ry="20" fill="#F9FBFF" opacity="0.8"/>
+<ellipse cx="600" cy="60" rx="50" ry="25" fill="#F9FBFF" opacity="0.8"/>
+<ellipse cx="720" cy="90" rx="35" ry="18" fill="#F9FBFF" opacity="0.8"/>
+</svg>

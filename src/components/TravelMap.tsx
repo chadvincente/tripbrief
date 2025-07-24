@@ -66,7 +66,6 @@ export default function TravelMap({ data }: TravelMapProps) {
 
     // Sample markers - in reality, we'd need coordinates from the AI response
     // For demo purposes, adding some mock coordinates around the center
-    let markerIndex = 0
 
     // Add attraction markers
     if (brief.attractions?.mustSee) {

@@ -1,4 +1,6 @@
 import type { TravelBriefResponse } from '@/lib/anthropic'
+import { useState, useEffect } from 'react'
+import { getCityImageClient, getImageAttribution, type CityImage } from '@/lib/cityImages'
 
 interface TravelBriefCheatsheetProps {
   data: TravelBriefResponse
@@ -6,6 +8,24 @@ interface TravelBriefCheatsheetProps {
 
 export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetProps) {
   const brief = data.structuredData
+  const [cityImage, setCityImage] = useState<CityImage | null>(null)
+  const [imageLoading, setImageLoading] = useState(true)
+
+  // Fetch city image
+  useEffect(() => {
+    const fetchCityImage = async () => {
+      try {
+        const image = await getCityImageClient(brief.destination)
+        setCityImage(image)
+      } catch (error) {
+        console.error('Error fetching city image:', error)
+      } finally {
+        setImageLoading(false)
+      }
+    }
+
+    fetchCityImage()
+  }, [brief.destination])
 
   // Combine related arrays for display with safe defaults
   const transportation = brief.transportation ? [
@@ -104,15 +124,40 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          📍 {brief.destination}
-        </h1>
-        {brief.startDate && brief.endDate && (
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            {new Date(brief.startDate).toLocaleDateString()} - {new Date(brief.endDate).toLocaleDateString()}
-          </p>
+      {/* Header with Background Image */}
+      <div className="relative rounded-xl overflow-hidden">
+        {/* Background Image */}
+        {imageLoading ? (
+          <div className="h-64 bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse" />
+        ) : (
+          <div 
+            className="h-64 bg-cover bg-center bg-gray-200 dark:bg-gray-700"
+            style={{
+              backgroundImage: cityImage ? `url(${cityImage.url})` : undefined,
+            }}
+          />
+        )}
+        
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        
+        {/* Header Content */}
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
+          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
+            📍 {brief.destination}
+          </h1>
+          {brief.startDate && brief.endDate && (
+            <p className="text-xl text-white drop-shadow-md">
+              {new Date(brief.startDate).toLocaleDateString()} - {new Date(brief.endDate).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+
+        {/* Optional: Image Attribution (not required for Pexels, but nice to have) */}
+        {false && cityImage && getImageAttribution(cityImage) && (
+          <div className="absolute bottom-2 right-2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
+            {getImageAttribution(cityImage)}
+          </div>
         )}
       </div>
 
