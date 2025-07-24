@@ -40,7 +40,18 @@ export default function Home() {
 
       // Umami Analytics (custom analytics)
       if (typeof window !== 'undefined' && window.umami) {
+        // Umami v2 syntax with properties
         window.umami.track('travel-brief-search', searchData)
+        
+        // Fallback: track destination as separate event name for better visibility
+        window.umami.track(`destination-${searchData.destination.toLowerCase().replace(/[^a-z0-9]/g, '-')}`)
+        
+        // Track whether dates were provided
+        if (searchData.hasDateRange) {
+          window.umami.track('search-with-date-range')
+        } else {
+          window.umami.track('search-without-dates')
+        }
       }
 
       // Vercel Analytics (performance + events)
@@ -228,6 +239,27 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Local Life</h3>
             <p className="text-gray-600 dark:text-gray-300">Restaurants, cafes, culture, and local insights</p>
+          </div>
+        </div>
+
+        {/* Newsletter Signup */}
+        <div className="mt-20 max-w-2xl mx-auto bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-8 text-center">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              ✈️ Get Travel Tips & Updates
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300">
+              Join fellow travelers for destination insights, new features, and curated travel tips delivered to your inbox.
+            </p>
+          </div>
+          
+          {/* ConvertKit Form */}
+          <div id="convertkit-form">
+            <script 
+              async 
+              data-uid="2e6639958f" 
+              src="https://tripbrief.kit.com/2e6639958f/index.js"
+            ></script>
           </div>
         </div>
       </main>
