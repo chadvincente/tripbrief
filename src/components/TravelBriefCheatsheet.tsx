@@ -7,42 +7,56 @@ interface TravelBriefCheatsheetProps {
 export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetProps) {
   const brief = data.structuredData
 
-  // Combine related arrays for display
-  const transportation = [
-    ...brief.transportation.publicTransit,
-    ...brief.transportation.alternatives,
-    ...brief.transportation.tips
-  ].slice(0, 6)
+  // Combine related arrays for display with safe defaults
+  const transportation = brief.transportation ? [
+    ...(brief.transportation.publicTransit || []),
+    ...(brief.transportation.alternatives || []),
+    ...(brief.transportation.tips || [])
+  ].slice(0, 6) : []
 
-  const attractions = [
-    ...brief.attractions.mustSee,
-    ...brief.attractions.photoSpots,
-    ...brief.attractions.experiences
-  ].slice(0, 6)
+  const attractions = brief.attractions ? [
+    ...(brief.attractions.mustSee || []),
+    ...(brief.attractions.photoSpots || []),
+    ...(brief.attractions.experiences || [])
+  ].slice(0, 6) : []
 
-  const food = [
-    ...brief.foodAndDrink.localSpecialties,
-    ...brief.foodAndDrink.restaurants,
-    ...brief.foodAndDrink.streetFood
-  ].slice(0, 6)
+  const food = brief.foodAndDrink ? [
+    ...(brief.foodAndDrink.localSpecialties || []),
+    ...(brief.foodAndDrink.restaurants || []),
+    ...(brief.foodAndDrink.streetFood || [])
+  ].slice(0, 6) : []
 
-  const neighborhoods = [
-    ...brief.neighborhoods.areas.map(area => `${area.name}: ${area.character}`),
-    ...brief.neighborhoods.whereToStay
-  ].slice(0, 6)
+  const neighborhoods = brief.neighborhoods ? [
+    ...(brief.neighborhoods.areas?.map(area => `${area.name}: ${area.character}`) || []),
+    ...(brief.neighborhoods.whereToStay || [])
+  ].slice(0, 6) : []
 
-  const events = [
-    ...brief.cultureAndEvents.events,
-    ...brief.cultureAndEvents.customs,
-    ...brief.cultureAndEvents.language
-  ].slice(0, 6)
+  const events = brief.cultureAndEvents ? [
+    ...(brief.cultureAndEvents.events || []),
+    ...(brief.cultureAndEvents.sportsEvents || []),
+    ...(brief.cultureAndEvents.customs || []),
+    ...(brief.cultureAndEvents.language || [])
+  ].slice(0, 6) : []
 
-  const practical = [
-    `Currency: ${brief.practical.currency}`,
-    `Exchange: ${brief.practical.exchangeRate}`,
-    ...brief.practical.tipping,
-    ...brief.practical.safety
-  ].slice(0, 6)
+  const dayTrips = brief.dayTrips ? [
+    ...(brief.dayTrips.nearbyDestinations || []),
+    ...(brief.dayTrips.transportation || []),
+    ...(brief.dayTrips.duration || [])
+  ].slice(0, 6) : []
+
+  const activeAndSports = brief.activeAndSports ? [
+    ...(brief.activeAndSports.running || []),
+    ...(brief.activeAndSports.cycling || []),
+    ...(brief.activeAndSports.sports || []),
+    ...(brief.activeAndSports.outdoorActivities || [])
+  ].slice(0, 6) : []
+
+  const practical = brief.practical ? [
+    ...(brief.practical.currency ? [`Currency: ${brief.practical.currency}`] : []),
+    ...(brief.practical.exchangeRate ? [`Exchange: ${brief.practical.exchangeRate}`] : []),
+    ...(brief.practical.tipping || []),
+    ...(brief.practical.safety || [])
+  ].slice(0, 6) : []
 
   const IconCard = ({ icon, title, items, color = 'blue' }: { 
     icon: string
@@ -104,42 +118,70 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
 
       {/* Main Info Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <IconCard 
-          icon="🚇" 
-          title="Transportation" 
-          items={transportation}
-          color="blue"
-        />
-        <IconCard 
-          icon="📸" 
-          title="Must-See Attractions" 
-          items={attractions}
-          color="green"
-        />
-        <IconCard 
-          icon="🍽️" 
-          title="Food & Drink" 
-          items={food}
-          color="orange"
-        />
-        <IconCard 
-          icon="🏘️" 
-          title="Neighborhoods" 
-          items={neighborhoods}
-          color="purple"
-        />
-        <IconCard 
-          icon="🎭" 
-          title="Culture & Events" 
-          items={events}
-          color="red"
-        />
-        <IconCard 
-          icon="💡" 
-          title="Practical Tips" 
-          items={practical}
-          color="indigo"
-        />
+        {transportation.length > 0 && (
+          <IconCard 
+            icon="🚇" 
+            title="Transportation" 
+            items={transportation}
+            color="blue"
+          />
+        )}
+        {attractions.length > 0 && (
+          <IconCard 
+            icon="📸" 
+            title="Must-See Attractions" 
+            items={attractions}
+            color="green"
+          />
+        )}
+        {food.length > 0 && (
+          <IconCard 
+            icon="🍽️" 
+            title="Food & Drink" 
+            items={food}
+            color="orange"
+          />
+        )}
+        {neighborhoods.length > 0 && (
+          <IconCard 
+            icon="🏘️" 
+            title="Neighborhoods" 
+            items={neighborhoods}
+            color="purple"
+          />
+        )}
+        {events.length > 0 && (
+          <IconCard 
+            icon="🎭" 
+            title="Culture & Events" 
+            items={events}
+            color="red"
+          />
+        )}
+        {dayTrips.length > 0 && (
+          <IconCard 
+            icon="🗺️" 
+            title="Day Trips" 
+            items={dayTrips}
+            color="indigo"
+          />
+        )}
+        {activeAndSports.length > 0 && (
+          <IconCard 
+            icon="🏃" 
+            title="Physical Activities" 
+            items={activeAndSports}
+            color="green"
+          />
+        )}
+        {practical.length > 0 && (
+          <IconCard 
+            icon="💡" 
+            title="Practical Tips" 
+            items={practical}
+            color="indigo"
+          />
+        )}
       </div>
 
       {/* Quick Facts */}
@@ -151,15 +193,17 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickFactCard 
             title="Emergency Numbers" 
-            content={brief.practical.emergency.join(', ') || 'Check local emergency services'} 
+            content={brief.practical?.emergency?.join(', ') || 'Check local emergency services'} 
           />
           <QuickFactCard 
             title="Language Tips" 
-            content={brief.cultureAndEvents.language.slice(0, 2).join(', ') || 'Learn basic greetings'} 
+            content={brief.cultureAndEvents?.language?.slice(0, 2).join(', ') || 'Learn basic greetings'} 
           />
           <QuickFactCard 
             title="Currency & Exchange" 
-            content={`${brief.practical.currency} - ${brief.practical.exchangeRate}`} 
+            content={brief.practical?.currency && brief.practical?.exchangeRate 
+              ? `${brief.practical.currency} - ${brief.practical.exchangeRate}` 
+              : 'Check current exchange rates'} 
           />
         </div>
       </div>

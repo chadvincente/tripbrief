@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { destination, startDate, endDate } = await request.json()
+    const { destination, startDate, endDate, categories } = await request.json()
 
     if (!destination) {
       return NextResponse.json(
@@ -38,61 +38,168 @@ export async function POST(request: NextRequest) {
     // Log the request for monitoring
     console.log(`Travel brief request: ${destination} (${startDate} to ${endDate}) from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`)
 
-    const prompt = `Create a comprehensive travel brief for ${destination} for a trip from ${startDate} to ${endDate}.
+    // Build dynamic prompt based on selected categories
+    const buildPrompt = () => {
+      let prompt = `Create a comprehensive travel brief for ${destination} for a trip from ${startDate} to ${endDate}.\n\nPlease return the response as a valid JSON object with the following structure:\n\n{`
+      
+      prompt += `\n  "destination": "${destination}",`
+      prompt += `\n  "startDate": "${startDate}",`
+      prompt += `\n  "endDate": "${endDate}",`
 
-Please return the response as a valid JSON object with the following exact structure:
-
-{
-  "destination": "${destination}",
-  "startDate": "${startDate}",
-  "endDate": "${endDate}",
-  "transportation": {
-    "publicTransit": ["specific transit info", "payment methods", "key routes"],
-    "alternatives": ["Uber/Lyft availability", "bike sharing", "walking areas"],
-    "paymentMethods": ["metro card info", "app recommendations", "cash vs card"],
-    "tips": ["practical transportation tips", "airport connections"]
-  },
-  "attractions": {
-    "mustSee": ["top 3-4 major attractions with brief descriptions"],
-    "photoSpots": ["best viewpoints", "Instagram-worthy locations"],
-    "museums": ["key museums and cultural sites"],
-    "experiences": ["unique local experiences", "seasonal activities"]
-  },
-  "foodAndDrink": {
-    "localSpecialties": ["must-try dishes", "regional specialties"],
-    "restaurants": ["highly recommended restaurants with brief descriptions"],
-    "cafes": ["notable coffee shops", "local cafe culture"],
-    "bars": ["popular bars/nightlife areas", "local drinking culture"],
-    "streetFood": ["street food recommendations", "food markets"]
-  },
-  "neighborhoods": {
-    "areas": [
-      {
-        "name": "Neighborhood Name",
-        "character": "Brief description of the area's vibe/character",
-        "highlights": ["key attractions in this area", "why to visit"]
+      // Transportation section
+      if (categories?.transportation?.enabled) {
+        prompt += `\n  "transportation": {`
+        if (categories.transportation.publicTransit) {
+          prompt += `\n    "publicTransit": ["specific transit info", "payment methods", "key routes"],`
+        }
+        if (categories.transportation.alternatives) {
+          prompt += `\n    "alternatives": ["Uber/Lyft availability", "bike sharing", "walking areas"],`
+        }
+        if (categories.transportation.publicTransit || categories.transportation.alternatives) {
+          prompt += `\n    "paymentMethods": ["metro card info", "app recommendations", "cash vs card"],`
+        }
+        if (categories.transportation.airport) {
+          prompt += `\n    "tips": ["airport connections", "practical transportation tips"]`
+        } else {
+          prompt += `\n    "tips": ["practical transportation tips"]`
+        }
+        prompt += `\n  },`
       }
-    ],
-    "layout": ["general city geography", "how areas connect"],
-    "whereToStay": ["best areas for tourists", "accommodation recommendations"]
-  },
-  "cultureAndEvents": {
-    "events": ["events during travel dates", "festivals", "seasonal happenings"],
-    "customs": ["important cultural customs", "local traditions"],
-    "etiquette": ["dos and don'ts", "social norms"],
-    "language": ["key phrases", "language tips", "English usage"]
-  },
-  "practical": {
-    "currency": "Local currency name",
-    "exchangeRate": "Approximate current exchange rate info",
-    "tipping": ["tipping customs", "typical amounts", "where to tip"],
-    "emergency": ["emergency numbers", "important contacts"],
-    "safety": ["safety tips", "areas to be aware of", "general precautions"],
-    "localNews": ["current events to be aware of", "travel advisories"]
-  }
-}
 
-Provide specific, actionable information for each section. Make sure the response is valid JSON that can be parsed directly.`
+      // Attractions section
+      if (categories?.attractions?.enabled) {
+        prompt += `\n  "attractions": {`
+        if (categories.attractions.landmarks) {
+          prompt += `\n    "mustSee": ["top major attractions with brief descriptions"],`
+        }
+        if (categories.attractions.viewpoints) {
+          prompt += `\n    "photoSpots": ["best viewpoints", "Instagram-worthy locations"],`
+        }
+        if (categories.attractions.museums) {
+          prompt += `\n    "museums": ["key museums and cultural sites"],`
+        }
+        if (categories.attractions.experiences) {
+          prompt += `\n    "experiences": ["unique local experiences", "seasonal activities"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Food & Drink section
+      if (categories?.foodAndDrink?.enabled) {
+        prompt += `\n  "foodAndDrink": {`
+        if (categories.foodAndDrink.restaurants) {
+          prompt += `\n    "localSpecialties": ["must-try dishes", "regional specialties"],`
+          prompt += `\n    "restaurants": ["highly recommended restaurants with brief descriptions"],`
+        }
+        if (categories.foodAndDrink.cafes) {
+          prompt += `\n    "cafes": ["notable coffee shops", "local cafe culture"],`
+        }
+        if (categories.foodAndDrink.bars) {
+          prompt += `\n    "bars": ["popular bars/nightlife areas", "local drinking culture"],`
+        }
+        if (categories.foodAndDrink.streetFood) {
+          prompt += `\n    "streetFood": ["street food recommendations", "food markets"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Neighborhoods section
+      if (categories?.neighborhoods?.enabled) {
+        prompt += `\n  "neighborhoods": {`
+        if (categories.neighborhoods.character) {
+          prompt += `\n    "areas": [`
+          prompt += `\n      {`
+          prompt += `\n        "name": "Neighborhood Name",`
+          prompt += `\n        "character": "Brief description of the area's vibe/character",`
+          prompt += `\n        "highlights": ["key attractions in this area", "why to visit"]`
+          prompt += `\n      }`
+          prompt += `\n    ],`
+        }
+        if (categories.neighborhoods.layout) {
+          prompt += `\n    "layout": ["general city geography", "how areas connect"],`
+        }
+        if (categories.neighborhoods.whereToStay) {
+          prompt += `\n    "whereToStay": ["best areas for tourists", "accommodation recommendations"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Culture & Events section
+      if (categories?.cultureAndEvents?.enabled) {
+        prompt += `\n  "cultureAndEvents": {`
+        if (categories.cultureAndEvents.events) {
+          prompt += `\n    "events": ["events during travel dates", "festivals", "seasonal happenings"],`
+        }
+        if (categories.cultureAndEvents.sportsEvents) {
+          prompt += `\n    "sportsEvents": ["professional sports games/matches during visit", "major sports teams", "stadium information"],`
+        }
+        if (categories.cultureAndEvents.customs) {
+          prompt += `\n    "customs": ["important cultural customs", "local traditions"],`
+          prompt += `\n    "etiquette": ["dos and don'ts", "social norms"],`
+        }
+        if (categories.cultureAndEvents.language) {
+          prompt += `\n    "language": ["key phrases", "language tips", "English usage"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Day Trips section
+      if (categories?.dayTrips?.enabled) {
+        prompt += `\n  "dayTrips": {`
+        if (categories.dayTrips.nearbyDestinations) {
+          prompt += `\n    "nearbyDestinations": ["nearby cities/attractions worth visiting", "day trip destinations"],`
+        }
+        if (categories.dayTrips.transportation) {
+          prompt += `\n    "transportation": ["how to get to day trip destinations", "transport options and costs"],`
+        }
+        if (categories.dayTrips.duration) {
+          prompt += `\n    "duration": ["recommended time for each destination", "timing and planning tips"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Physical Activities section
+      if (categories?.activeAndSports?.enabled) {
+        prompt += `\n  "activeAndSports": {`
+        if (categories.activeAndSports.running) {
+          prompt += `\n    "running": ["popular running routes", "parks and trails", "running clubs/events"],`
+        }
+        if (categories.activeAndSports.cycling) {
+          prompt += `\n    "cycling": ["bike rental locations", "cycling routes", "bike-friendly areas"],`
+        }
+        if (categories.activeAndSports.sports) {
+          prompt += `\n    "sports": ["local sports venues", "fitness centers", "sports events to watch"],`
+        }
+        if (categories.activeAndSports.outdoorActivities) {
+          prompt += `\n    "outdoorActivities": ["hiking trails", "outdoor recreation", "nature activities"]`
+        }
+        prompt += `\n  },`
+      }
+
+      // Practical section
+      if (categories?.practical?.enabled) {
+        prompt += `\n  "practical": {`
+        if (categories.practical.currency) {
+          prompt += `\n    "currency": "Local currency name",`
+          prompt += `\n    "exchangeRate": "Approximate current exchange rate info",`
+          prompt += `\n    "tipping": ["tipping customs", "typical amounts", "where to tip"],`
+        }
+        prompt += `\n    "emergency": ["emergency numbers", "important contacts"],`
+        if (categories.practical.safety) {
+          prompt += `\n    "safety": ["safety tips", "areas to be aware of", "general precautions"],`
+        }
+        if (categories.practical.localNews) {
+          prompt += `\n    "localNews": ["current events to be aware of", "travel advisories"]`
+        }
+        prompt += `\n  }`
+      }
+
+      prompt += `\n}\n\nProvide specific, actionable information for each requested section. Make sure the response is valid JSON that can be parsed directly.`
+      
+      return prompt
+    }
+
+    const prompt = buildPrompt()
 
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
