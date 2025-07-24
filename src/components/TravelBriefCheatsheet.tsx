@@ -28,59 +28,80 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
   }, [brief.destination])
 
   // Combine related arrays for display with safe defaults
-  const transportation = brief.transportation ? [
-    ...(brief.transportation.publicTransit || []),
-    ...(brief.transportation.alternatives || []),
-    ...(brief.transportation.tips || [])
-  ].slice(0, 6) : []
+  const transportation = brief.transportation
+    ? [
+        ...(brief.transportation.publicTransit || []),
+        ...(brief.transportation.alternatives || []),
+        ...(brief.transportation.tips || []),
+      ].slice(0, 6)
+    : []
 
-  const attractions = brief.attractions ? [
-    ...(brief.attractions.mustSee || []),
-    ...(brief.attractions.photoSpots || []),
-    ...(brief.attractions.experiences || [])
-  ].slice(0, 6) : []
+  const attractions = brief.attractions
+    ? [
+        ...(brief.attractions.mustSee || []),
+        ...(brief.attractions.photoSpots || []),
+        ...(brief.attractions.experiences || []),
+      ].slice(0, 6)
+    : []
 
-  const food = brief.foodAndDrink ? [
-    ...(brief.foodAndDrink.localSpecialties || []),
-    ...(brief.foodAndDrink.restaurants || []),
-    ...(brief.foodAndDrink.streetFood || [])
-  ].slice(0, 6) : []
+  const food = brief.foodAndDrink
+    ? [
+        ...(brief.foodAndDrink.localSpecialties || []),
+        ...(brief.foodAndDrink.restaurants || []),
+        ...(brief.foodAndDrink.streetFood || []),
+      ].slice(0, 6)
+    : []
 
-  const neighborhoods = brief.neighborhoods ? [
-    ...(brief.neighborhoods.areas?.map(area => `${area.name}: ${area.character}`) || []),
-    ...(brief.neighborhoods.whereToStay || [])
-  ].slice(0, 6) : []
+  const neighborhoods = brief.neighborhoods
+    ? [
+        ...(brief.neighborhoods.areas?.map((area) => `${area.name}: ${area.character}`) || []),
+        ...(brief.neighborhoods.whereToStay || []),
+      ].slice(0, 6)
+    : []
 
-  const events = brief.cultureAndEvents ? [
-    ...(brief.cultureAndEvents.events || []),
-    ...(brief.cultureAndEvents.sportsEvents || []),
-    ...(brief.cultureAndEvents.customs || []),
-    ...(brief.cultureAndEvents.language || [])
-  ].slice(0, 6) : []
+  const events = brief.cultureAndEvents
+    ? [
+        ...(brief.cultureAndEvents.events || []),
+        ...(brief.cultureAndEvents.sportsEvents || []),
+        ...(brief.cultureAndEvents.customs || []),
+        ...(brief.cultureAndEvents.language || []),
+      ].slice(0, 6)
+    : []
 
-  const dayTrips = brief.dayTrips ? [
-    ...(brief.dayTrips.nearbyDestinations || []),
-    ...(brief.dayTrips.transportation || []),
-    ...(brief.dayTrips.duration || [])
-  ].slice(0, 6) : []
+  const dayTrips = brief.dayTrips
+    ? [
+        ...(brief.dayTrips.nearbyDestinations || []),
+        ...(brief.dayTrips.transportation || []),
+        ...(brief.dayTrips.duration || []),
+      ].slice(0, 6)
+    : []
 
-  const activeAndSports = brief.activeAndSports ? [
-    ...(brief.activeAndSports.running || []),
-    ...(brief.activeAndSports.cycling || []),
-    ...(brief.activeAndSports.sports || []),
-    ...(brief.activeAndSports.outdoorActivities || [])
-  ].slice(0, 6) : []
+  const activeAndSports = brief.activeAndSports
+    ? [
+        ...(brief.activeAndSports.running || []),
+        ...(brief.activeAndSports.cycling || []),
+        ...(brief.activeAndSports.sports || []),
+        ...(brief.activeAndSports.outdoorActivities || []),
+      ].slice(0, 6)
+    : []
 
-  const practical = brief.practical ? [
-    ...(brief.practical.currency ? [`Currency: ${brief.practical.currency}`] : []),
-    ...(brief.practical.exchangeRate ? [`Exchange: ${brief.practical.exchangeRate}`] : []),
-    ...(brief.practical.tipping || []),
-    ...(brief.practical.safety || [])
-  ].slice(0, 6) : []
+  const practical = brief.practical
+    ? [
+        ...(brief.practical.currency ? [`Currency: ${brief.practical.currency}`] : []),
+        ...(brief.practical.exchangeRate ? [`Exchange: ${brief.practical.exchangeRate}`] : []),
+        ...(brief.practical.tipping || []),
+        ...(brief.practical.safety || []),
+      ].slice(0, 6)
+    : []
 
-  const IconCard = ({ icon, title, items, color = 'blue' }: { 
+  const IconCard = ({
+    icon,
+    title,
+    items,
+    color = 'blue',
+  }: {
     icon: string
-    title: string 
+    title: string
     items: string[]
     color?: string
   }) => {
@@ -90,11 +111,13 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
       purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
       orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
       red: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
-      indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'
+      indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
     }
 
     return (
-      <div className={`p-6 rounded-xl border-2 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.blue} h-full`}>
+      <div
+        className={`p-6 rounded-xl border-2 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.blue} h-full`}
+      >
         <div className="flex items-center mb-4">
           <span className="text-3xl mr-3">{icon}</span>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
@@ -115,7 +138,7 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
     )
   }
 
-  const QuickFactCard = ({ title, content }: { title: string, content: string }) => (
+  const QuickFactCard = ({ title, content }: { title: string; content: string }) => (
     <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
       <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{title}</h4>
       <p className="text-sm text-gray-700 dark:text-gray-300">{content}</p>
@@ -130,17 +153,17 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         {imageLoading ? (
           <div className="h-64 bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse" />
         ) : (
-          <div 
+          <div
             className="h-64 bg-cover bg-center bg-gray-200 dark:bg-gray-700"
             style={{
               backgroundImage: cityImage ? `url(${cityImage.url})` : undefined,
             }}
           />
         )}
-        
+
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black bg-opacity-40" />
-        
+
         {/* Header Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
@@ -148,84 +171,50 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
           </h1>
           {brief.startDate && brief.endDate && (
             <p className="text-xl text-white drop-shadow-md">
-              {new Date(brief.startDate).toLocaleDateString()} - {new Date(brief.endDate).toLocaleDateString()}
+              {new Date(brief.startDate).toLocaleDateString()} -{' '}
+              {new Date(brief.endDate).toLocaleDateString()}
             </p>
           )}
         </div>
 
         {/* Optional: Image Attribution (not required for Pexels, but nice to have) */}
-        {false && cityImage && getImageAttribution(cityImage) && (
-          <div className="absolute bottom-2 right-2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-            {getImageAttribution(cityImage)}
-          </div>
-        )}
+        {false &&
+          cityImage &&
+          (() => {
+            const attribution = getImageAttribution(cityImage!)
+            return (
+              attribution && (
+                <div className="absolute bottom-2 right-2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
+                  {attribution}
+                </div>
+              )
+            )
+          })()}
       </div>
 
       {/* Main Info Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {transportation.length > 0 && (
-          <IconCard 
-            icon="🚇" 
-            title="Transportation" 
-            items={transportation}
-            color="blue"
-          />
+          <IconCard icon="🚇" title="Transportation" items={transportation} color="blue" />
         )}
         {attractions.length > 0 && (
-          <IconCard 
-            icon="📸" 
-            title="Must-See Attractions" 
-            items={attractions}
-            color="green"
-          />
+          <IconCard icon="📸" title="Must-See Attractions" items={attractions} color="green" />
         )}
-        {food.length > 0 && (
-          <IconCard 
-            icon="🍽️" 
-            title="Food & Drink" 
-            items={food}
-            color="orange"
-          />
-        )}
+        {food.length > 0 && <IconCard icon="🍽️" title="Food & Drink" items={food} color="orange" />}
         {neighborhoods.length > 0 && (
-          <IconCard 
-            icon="🏘️" 
-            title="Neighborhoods" 
-            items={neighborhoods}
-            color="purple"
-          />
+          <IconCard icon="🏘️" title="Neighborhoods" items={neighborhoods} color="purple" />
         )}
         {events.length > 0 && (
-          <IconCard 
-            icon="🎭" 
-            title="Culture & Events" 
-            items={events}
-            color="red"
-          />
+          <IconCard icon="🎭" title="Culture & Events" items={events} color="red" />
         )}
         {dayTrips.length > 0 && (
-          <IconCard 
-            icon="🗺️" 
-            title="Day Trips" 
-            items={dayTrips}
-            color="indigo"
-          />
+          <IconCard icon="🗺️" title="Day Trips" items={dayTrips} color="indigo" />
         )}
         {activeAndSports.length > 0 && (
-          <IconCard 
-            icon="🏃" 
-            title="Physical Activities" 
-            items={activeAndSports}
-            color="green"
-          />
+          <IconCard icon="🏃" title="Physical Activities" items={activeAndSports} color="green" />
         )}
         {practical.length > 0 && (
-          <IconCard 
-            icon="💡" 
-            title="Practical Tips" 
-            items={practical}
-            color="indigo"
-          />
+          <IconCard icon="💡" title="Practical Tips" items={practical} color="indigo" />
         )}
       </div>
 
@@ -236,19 +225,23 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
           Quick Reference
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <QuickFactCard 
-            title="Emergency Numbers" 
-            content={brief.practical?.emergency?.join(', ') || 'Check local emergency services'} 
+          <QuickFactCard
+            title="Emergency Numbers"
+            content={brief.practical?.emergency?.join(', ') || 'Check local emergency services'}
           />
-          <QuickFactCard 
-            title="Language Tips" 
-            content={brief.cultureAndEvents?.language?.slice(0, 2).join(', ') || 'Learn basic greetings'} 
+          <QuickFactCard
+            title="Language Tips"
+            content={
+              brief.cultureAndEvents?.language?.slice(0, 2).join(', ') || 'Learn basic greetings'
+            }
           />
-          <QuickFactCard 
-            title="Currency & Exchange" 
-            content={brief.practical?.currency && brief.practical?.exchangeRate 
-              ? `${brief.practical.currency} - ${brief.practical.exchangeRate}` 
-              : 'Check current exchange rates'} 
+          <QuickFactCard
+            title="Currency & Exchange"
+            content={
+              brief.practical?.currency && brief.practical?.exchangeRate
+                ? `${brief.practical.currency} - ${brief.practical.exchangeRate}`
+                : 'Check current exchange rates'
+            }
           />
         </div>
       </div>
