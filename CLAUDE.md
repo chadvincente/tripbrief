@@ -35,24 +35,29 @@ npm run prebuild
 TripBrief is a Next.js 15 application that generates comprehensive travel briefs using the Anthropic API. The architecture follows these key patterns:
 
 ### Core Structure
+
 - **App Router**: Uses Next.js 15 app directory structure (`src/app/`)
 - **API Routes**: Server-side API endpoints in `src/app/api/`
 - **TypeScript**: Fully typed with strict TypeScript configuration
 - **Tailwind CSS**: Utility-first CSS framework for styling
 
 ### Key Directories
+
 - `src/app/`: Next.js app router pages and layouts
 - `src/app/api/`: API route handlers
 - `src/components/`: Reusable React components
 - `src/lib/`: Utility functions and shared logic
 
 ### API Integration
+
 The application integrates with Anthropic's Claude API to generate travel briefs:
+
 - **Primary endpoint**: `POST /api/generate-brief`
-- **Model**: Uses `claude-3-5-sonnet-20241022`
+- **Model**: Uses `claude-sonnet-4-20250514`
 - **Environment**: Requires `ANTHROPIC_API_KEY` in `.env.local`
 
 ### Data Flow
+
 1. User submits destination and travel dates via frontend form
 2. Frontend sends POST request to `/api/generate-brief`
 3. API route constructs comprehensive prompt for Claude
@@ -68,6 +73,7 @@ The application integrates with Anthropic's Claude API to generate travel briefs
 ## Environment Setup
 
 Copy `.env.local.example` to `.env.local` and add your Anthropic API key:
+
 ```
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
@@ -75,6 +81,7 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ## Deployment
 
 ### Vercel (Recommended)
+
 The application is optimized for Vercel deployment:
 
 1. **Connect your GitHub repository** to Vercel
@@ -84,13 +91,16 @@ The application is optimized for Vercel deployment:
 3. **Deploy** - Vercel handles the build automatically
 
 ### Rate Limiting
+
 Production includes IP-based rate limiting to protect against excessive API costs:
+
 - 3 requests per minute per IP
 - 10 requests per hour per IP
 - Automatic cleanup of expired rate limit entries
 - Graceful error handling with retry information
 
 ### Analytics & Monitoring
+
 - **Vercel Analytics**: Page views, performance metrics, custom events
 - **Umami Analytics**: Privacy-focused analytics without cookies
 - **Speed Insights**: Core Web Vitals and performance monitoring
@@ -99,6 +109,7 @@ Production includes IP-based rate limiting to protect against excessive API cost
 - Response times and errors are logged
 
 ### Cost Protection
+
 Each travel brief generation costs approximately $0.01-0.03 in Anthropic API usage. The rate limiting provides protection against unexpected costs from high usage.
 
 ## Development Notes

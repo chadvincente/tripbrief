@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { TravelBriefResponse, CategoryOptions } from '@/lib/anthropic'
+import type { TravelBriefResponse, CategoryOptions, BudgetOption } from '@/lib/anthropic'
 import TravelBriefCheatsheet from '@/components/TravelBriefCheatsheet'
 import TravelBriefText from '@/components/TravelBriefText'
 import TravelMap from '@/components/TravelMap'
@@ -13,13 +13,31 @@ import Script from 'next/script'
 // Default category settings (all enabled)
 const defaultCategories: CategoryOptions = {
   transportation: { enabled: true, publicTransit: true, alternatives: true, airport: true },
-  attractions: { enabled: true, museums: true, landmarks: true, viewpoints: true, experiences: true },
+  attractions: {
+    enabled: true,
+    museums: true,
+    landmarks: true,
+    viewpoints: true,
+    experiences: true,
+  },
   foodAndDrink: { enabled: true, restaurants: true, streetFood: true, bars: true, cafes: true },
   neighborhoods: { enabled: true, layout: true, whereToStay: true, character: true },
-  cultureAndEvents: { enabled: true, events: true, sportsEvents: true, customs: true, language: true },
+  cultureAndEvents: {
+    enabled: true,
+    events: true,
+    sportsEvents: true,
+    customs: true,
+    language: true,
+  },
   dayTrips: { enabled: true, nearbyDestinations: true, transportation: true, duration: true },
-  activeAndSports: { enabled: true, running: true, cycling: true, sports: true, outdoorActivities: true },
-  practical: { enabled: true, currency: true, safety: true, localNews: true }
+  activeAndSports: {
+    enabled: true,
+    running: true,
+    cycling: true,
+    sports: true,
+    outdoorActivities: true,
+  },
+  practical: { enabled: true, currency: true, safety: true, localNews: true },
 }
 
 export default function Home() {
@@ -29,6 +47,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'cheatsheet' | 'text' | 'map'>('cheatsheet')
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const [categories, setCategories] = useState<CategoryOptions>(defaultCategories)
+  const [budget, setBudget] = useState<BudgetOption>('standard')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -51,10 +70,10 @@ export default function Home() {
       const enabledCategories = Object.entries(categories)
         .filter(([_, config]) => config.enabled)
         .map(([key, _]) => key)
-      
+
       const categoryCount = enabledCategories.length
       const isCustomized = categoryCount < 8 // Less than all 8 categories
-      
+
       // Track the search event with both analytics platforms
       const searchData = {
         destination: destination.trim(),
@@ -63,17 +82,19 @@ export default function Home() {
         hasDateRange: !!(startDate && endDate),
         enabledCategories: enabledCategories.join(','),
         categoryCount,
-        isCustomized
+        isCustomized,
       }
 
       // Umami Analytics (custom analytics)
       if (typeof window !== 'undefined' && window.umami) {
         // Umami v2 syntax with properties
         window.umami.track('travel-brief-search', searchData)
-        
+
         // Fallback: track destination as separate event name for better visibility
-        window.umami.track(`destination-${searchData.destination.toLowerCase().replace(/[^a-z0-9]/g, '-')}`)
-        
+        window.umami.track(
+          `destination-${searchData.destination.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
+        )
+
         // Track whether dates were provided
         if (searchData.hasDateRange) {
           window.umami.track('search-with-date-range')
@@ -95,6 +116,7 @@ export default function Home() {
           startDate,
           endDate,
           categories,
+          budget,
         }),
       })
 
@@ -103,7 +125,9 @@ export default function Home() {
         if (response.status === 429) {
           const resetTime = new Date(errorData.resetTime)
           const waitMinutes = Math.ceil((resetTime.getTime() - Date.now()) / (1000 * 60))
-          throw new Error(`${errorData.error} Please wait ${waitMinutes} minute${waitMinutes !== 1 ? 's' : ''} before trying again.`)
+          throw new Error(
+            `${errorData.error} Please wait ${waitMinutes} minute${waitMinutes !== 1 ? 's' : ''} before trying again.`
+          )
         }
         throw new Error(errorData.error || 'Failed to generate travel brief')
       }
@@ -130,7 +154,7 @@ export default function Home() {
                 >
                   ← New Search
                 </button>
-                
+
                 <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
                   <button
                     onClick={() => setViewMode('cheatsheet')}
@@ -184,19 +208,20 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
       <main className="container mx-auto px-4 py-8 flex-1">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            TripBrief
-          </h1>
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">TripBrief</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get comprehensive travel information for any destination in seconds. 
-            From public transit to local culture, we&apos;ve got you covered.
+            Get comprehensive travel information for any destination in seconds. From public transit
+            to local culture, we&apos;ve got you covered.
           </p>
         </div>
 
         <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="destination" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="destination"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Destination
               </label>
               <input
@@ -211,7 +236,10 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="startDate"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Travel Date
                 </label>
                 <input
@@ -222,7 +250,10 @@ export default function Home() {
                 />
               </div>
               <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="endDate"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Return Date
                 </label>
                 <input
@@ -255,7 +286,7 @@ export default function Home() {
                   'Generate My Travel Brief'
                 )}
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => setShowAdvancedSearch(true)}
@@ -273,24 +304,34 @@ export default function Home() {
             <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
               🚇
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Transportation</h3>
-            <p className="text-gray-600 dark:text-gray-300">Public transit info, rideshare options, and local transportation tips</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Transportation
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Public transit info, rideshare options, and local transportation tips
+            </p>
           </div>
-          
+
           <div className="text-center p-6">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
               📸
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Attractions</h3>
-            <p className="text-gray-600 dark:text-gray-300">Must-see sights, photo spots, and hidden gems</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Attractions
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Must-see sights, photo spots, and hidden gems
+            </p>
           </div>
-          
+
           <div className="text-center p-6">
             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
               🍽️
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Local Life</h3>
-            <p className="text-gray-600 dark:text-gray-300">Restaurants, cafes, culture, and local insights</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              Restaurants, cafes, culture, and local insights
+            </p>
           </div>
         </div>
 
@@ -301,21 +342,24 @@ export default function Home() {
               ✈️ Get Travel Tips & Updates
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              Join fellow travelers for destination insights, new features, and curated travel tips delivered to your inbox.
+              Join fellow travelers for destination insights, new features, and curated travel tips
+              delivered to your inbox.
             </p>
           </div>
-          
+
           {/* MailerLite Form */}
           <div className="ml-embedded" data-form="SSrfUE"></div>
         </div>
       </main>
       <Footer />
-      
+
       <AdvancedSearchModal
         isOpen={showAdvancedSearch}
         onClose={() => setShowAdvancedSearch(false)}
         categories={categories}
         onCategoriesChange={setCategories}
+        budget={budget}
+        onBudgetChange={setBudget}
       />
     </div>
   )

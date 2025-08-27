@@ -4,6 +4,14 @@ import { useLoadScript, GoogleMap, MarkerF, InfoWindowF } from '@react-google-ma
 import { useState, useMemo, useEffect } from 'react'
 import type { TravelBriefResponse } from '@/lib/anthropic'
 
+interface PlaceCoordinate {
+  name: string
+  lat: number
+  lng: number
+  address?: string
+  rating?: number
+}
+
 interface TravelMapProps {
   data: TravelBriefResponse
 }
@@ -19,19 +27,21 @@ interface MapMarker {
 
 const mapContainerStyle = {
   width: '100%',
-  height: '500px'
+  height: '500px',
 }
 
-const libraries: ("places" | "geometry")[] = ['places', 'geometry']
+const libraries: ('places' | 'geometry')[] = ['places', 'geometry']
 
 export default function TravelMap({ data }: TravelMapProps) {
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null)
-  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 40.7128, lng: -74.0060 })
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 40.7128, lng: -74.006 })
   const [isGeocodingLoading, setIsGeocodingLoading] = useState(true)
+  const [placeCoordinates, setPlaceCoordinates] = useState<(PlaceCoordinate | null)[]>([])
+  const [isLoadingPlaces, setIsLoadingPlaces] = useState(false)
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    libraries
+    libraries,
   })
 
   // Geocode the destination to get the correct center coordinates
@@ -39,97 +49,164 @@ export default function TravelMap({ data }: TravelMapProps) {
     if (!isLoaded || !data.destination) return
 
     const geocoder = new google.maps.Geocoder()
-    
-    geocoder.geocode(
-      { address: data.destination },
-      (results, status) => {
-        setIsGeocodingLoading(false)
-        
-        if (status === 'OK' && results && results[0]) {
-          const location = results[0].geometry.location
-          setCenter({
-            lat: location.lat(),
-            lng: location.lng()
-          })
-        } else {
-          console.warn(`Geocoding failed for ${data.destination}:`, status)
-          // Keep default center if geocoding fails
-        }
+
+    geocoder.geocode({ address: data.destination }, (results, status) => {
+      setIsGeocodingLoading(false)
+
+      if (status === 'OK' && results && results[0]) {
+        const location = results[0].geometry.location
+        setCenter({
+          lat: location.lat(),
+          lng: location.lng(),
+        })
+      } else {
+        console.warn(`Geocoding failed for ${data.destination}:`, status)
+        // Keep default center if geocoding fails
       }
-    )
+    })
   }, [isLoaded, data.destination])
 
-  // Extract markers from travel brief data
+  // Fetch coordinates for attractions and restaurants
+  useEffect(() => {
+    if (!isLoaded || isGeocodingLoading) return
+
+    const fetchPlaceCoordinates = async () => {
+      setIsLoadingPlaces(true)
+
+      try {
+        const brief = data.structuredData
+        const places: string[] = []
+
+        // Collect attraction names
+        if (brief.attractions?.mustSee) {
+          places.push(...brief.attractions.mustSee.slice(0, 3))
+        }
+
+        // Collect restaurant names
+        if (brief.foodAndDrink?.restaurants) {
+          places.push(...brief.foodAndDrink.restaurants.slice(0, 3))
+        }
+
+        if (places.length > 0) {
+          const response = await fetch('/api/place-coordinates', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              places: places,
+              cityName: brief.destination,
+            }),
+          })
+
+          if (response.ok) {
+            const { coordinates } = await response.json()
+            setPlaceCoordinates(coordinates)
+          } else {
+            console.error('Failed to fetch place coordinates')
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching place coordinates:', error)
+      } finally {
+        setIsLoadingPlaces(false)
+      }
+    }
+
+    fetchPlaceCoordinates()
+  }, [isLoaded, isGeocodingLoading, data.structuredData, data.structuredData.destination])
+
+  // Extract markers from travel brief data using real coordinates
   const markers = useMemo((): MapMarker[] => {
     const markerList: MapMarker[] = []
     const brief = data.structuredData
+    let coordinateIndex = 0
 
-    // Sample markers - in reality, we'd need coordinates from the AI response
-    // For demo purposes, adding some mock coordinates around the center
-
-    // Add attraction markers
+    // Add attraction markers with real coordinates
     if (brief.attractions?.mustSee) {
-      brief.attractions.mustSee.slice(0, 5).forEach((attraction, index) => {
-        markerList.push({
-          id: `attraction-${index}`,
-          position: {
-            lat: center.lat + (Math.random() - 0.5) * 0.02,
-            lng: center.lng + (Math.random() - 0.5) * 0.02
-          },
-          title: attraction,
-          category: 'Attraction',
-          description: `Must-see attraction: ${attraction}`,
-          icon: '📸'
-        })
+      brief.attractions.mustSee.slice(0, 3).forEach((attraction, index) => {
+        const coordinate = placeCoordinates[coordinateIndex]
+
+        if (coordinate) {
+          markerList.push({
+            id: `attraction-${index}`,
+            position: {
+              lat: coordinate.lat,
+              lng: coordinate.lng,
+            },
+            title: coordinate.name,
+            category: 'Attraction',
+            description: `Must-see attraction: ${coordinate.name}${coordinate.address ? ` • ${coordinate.address}` : ''}${coordinate.rating ? ` • ⭐ ${coordinate.rating}` : ''}`,
+            icon: '📸',
+          })
+        } else {
+          // Fallback to approximate position if no coordinates found
+          markerList.push({
+            id: `attraction-${index}`,
+            position: {
+              lat: center.lat + (Math.random() - 0.5) * 0.01,
+              lng: center.lng + (Math.random() - 0.5) * 0.01,
+            },
+            title: attraction,
+            category: 'Attraction',
+            description: `Must-see attraction: ${attraction} (approximate location)`,
+            icon: '📸',
+          })
+        }
+        coordinateIndex++
       })
     }
 
-    // Add restaurant markers
+    // Add restaurant markers with real coordinates
     if (brief.foodAndDrink?.restaurants) {
-      brief.foodAndDrink.restaurants.slice(0, 5).forEach((restaurant, index) => {
-        markerList.push({
-          id: `restaurant-${index}`,
-          position: {
-            lat: center.lat + (Math.random() - 0.5) * 0.02,
-            lng: center.lng + (Math.random() - 0.5) * 0.02
-          },
-          title: restaurant,
-          category: 'Restaurant',
-          description: `Recommended restaurant: ${restaurant}`,
-          icon: '🍽️'
-        })
-      })
-    }
+      brief.foodAndDrink.restaurants.slice(0, 3).forEach((restaurant, index) => {
+        const coordinate = placeCoordinates[coordinateIndex]
 
-    // Add day trip markers
-    if (brief.dayTrips?.nearbyDestinations) {
-      brief.dayTrips.nearbyDestinations.slice(0, 3).forEach((destination, index) => {
-        markerList.push({
-          id: `daytrip-${index}`,
-          position: {
-            lat: center.lat + (Math.random() - 0.5) * 0.04,
-            lng: center.lng + (Math.random() - 0.5) * 0.04
-          },
-          title: destination,
-          category: 'Day Trip',
-          description: `Day trip destination: ${destination}`,
-          icon: '🗺️'
-        })
+        if (coordinate) {
+          markerList.push({
+            id: `restaurant-${index}`,
+            position: {
+              lat: coordinate.lat,
+              lng: coordinate.lng,
+            },
+            title: coordinate.name,
+            category: 'Restaurant',
+            description: `Recommended restaurant: ${coordinate.name}${coordinate.address ? ` • ${coordinate.address}` : ''}${coordinate.rating ? ` • ⭐ ${coordinate.rating}` : ''}`,
+            icon: '🍽️',
+          })
+        } else {
+          // Fallback to approximate position if no coordinates found
+          markerList.push({
+            id: `restaurant-${index}`,
+            position: {
+              lat: center.lat + (Math.random() - 0.5) * 0.01,
+              lng: center.lng + (Math.random() - 0.5) * 0.01,
+            },
+            title: restaurant,
+            category: 'Restaurant',
+            description: `Recommended restaurant: ${restaurant} (approximate location)`,
+            icon: '🍽️',
+          })
+        }
+        coordinateIndex++
       })
     }
 
     return markerList
-  }, [data, center])
+  }, [data, center, placeCoordinates])
 
-  const mapOptions = useMemo(() => ({
-    disableDefaultUI: false,
-    clickableIcons: false,
-    scrollwheel: true,
-    zoomControl: true,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: true,
-  }), [])
+  const mapOptions = useMemo(
+    () => ({
+      disableDefaultUI: false,
+      clickableIcons: false,
+      scrollwheel: true,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
+    }),
+    []
+  )
 
   if (loadError) {
     return (
@@ -139,24 +216,29 @@ export default function TravelMap({ data }: TravelMapProps) {
     )
   }
 
-  if (!isLoaded || isGeocodingLoading) {
+  if (!isLoaded || isGeocodingLoading || isLoadingPlaces) {
     return (
       <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
         <span className="text-gray-600 dark:text-gray-300">
-          {!isLoaded ? 'Loading map...' : `Finding ${data.destination}...`}
+          {!isLoaded
+            ? 'Loading map...'
+            : isGeocodingLoading
+              ? `Finding ${data.destination}...`
+              : 'Finding attraction locations...'}
         </span>
       </div>
     )
   }
 
-  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === 'your_google_maps_api_key_here') {
+  if (
+    !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === 'your_google_maps_api_key_here'
+  ) {
     return (
       <div className="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded">
         <h3 className="font-semibold mb-2">🗺️ Map Feature Coming Soon!</h3>
-        <p className="text-sm">
-          To enable the interactive map with location markers, please:
-        </p>
+        <p className="text-sm">To enable the interactive map with location markers, please:</p>
         <ol className="text-sm mt-2 ml-4 list-decimal">
           <li>Get a Google Maps API key from Google Cloud Console</li>
           <li>Add it to your .env.local file as NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</li>
@@ -215,7 +297,7 @@ export default function TravelMap({ data }: TravelMapProps) {
                   </svg>
                 `)}`,
                 scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 20)
+                anchor: new google.maps.Point(20, 20),
               }}
             />
           ))}
@@ -238,7 +320,8 @@ export default function TravelMap({ data }: TravelMapProps) {
       </div>
 
       <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-        📍 Map centered on {data.destination}. Attraction locations are approximate and will be enhanced with precise coordinates in future updates.
+        📍 Map centered on {data.destination}. Locations powered by Google Places API for accurate
+        positioning.
       </div>
     </div>
   )

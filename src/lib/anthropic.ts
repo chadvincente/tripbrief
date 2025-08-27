@@ -59,11 +59,14 @@ export type CategoryOptions = {
   }
 }
 
+export type BudgetOption = 'budget-friendly' | 'standard' | 'luxury'
+
 export type TravelBriefRequest = {
   destination: string
   startDate: string
   endDate: string
   categories?: CategoryOptions
+  budget?: BudgetOption
 }
 
 export type StructuredTravelBrief = {
@@ -81,6 +84,7 @@ export type StructuredTravelBrief = {
     photoSpots?: string[]
     museums?: string[]
     experiences?: string[]
+    offTheBeatenPath?: string[]
   }
   foodAndDrink?: {
     localSpecialties?: string[]
@@ -88,6 +92,7 @@ export type StructuredTravelBrief = {
     cafes?: string[]
     bars?: string[]
     streetFood?: string[]
+    tipping?: string[]
   }
   neighborhoods?: {
     areas?: Array<{
@@ -119,10 +124,17 @@ export type StructuredTravelBrief = {
   practical?: {
     currency?: string
     exchangeRate?: string
-    tipping?: string[]
+    paymentMethods?: string[]
     emergency?: string[]
     safety?: string[]
     localNews?: string[]
+    culturalFauxPas?: string[]
+    commonScams?: string[]
+  }
+  uniqueSouvenirs?: {
+    traditional?: string[]
+    specialty?: string[]
+    whereToBuy?: string[]
   }
 }
 

@@ -41,6 +41,7 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         ...(brief.attractions.mustSee || []),
         ...(brief.attractions.photoSpots || []),
         ...(brief.attractions.experiences || []),
+        ...(brief.attractions.offTheBeatenPath || []),
       ].slice(0, 6)
     : []
 
@@ -49,6 +50,7 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         ...(brief.foodAndDrink.localSpecialties || []),
         ...(brief.foodAndDrink.restaurants || []),
         ...(brief.foodAndDrink.streetFood || []),
+        ...(brief.foodAndDrink.tipping || []),
       ].slice(0, 6)
     : []
 
@@ -85,12 +87,22 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
       ].slice(0, 6)
     : []
 
+  const souvenirs = brief.uniqueSouvenirs
+    ? [
+        ...(brief.uniqueSouvenirs.traditional || []),
+        ...(brief.uniqueSouvenirs.specialty || []),
+        ...(brief.uniqueSouvenirs.whereToBuy || []),
+      ].slice(0, 6)
+    : []
+
   const practical = brief.practical
     ? [
         ...(brief.practical.currency ? [`Currency: ${brief.practical.currency}`] : []),
         ...(brief.practical.exchangeRate ? [`Exchange: ${brief.practical.exchangeRate}`] : []),
-        ...(brief.practical.tipping || []),
+        ...(brief.practical.paymentMethods || []),
         ...(brief.practical.safety || []),
+        ...(brief.practical.culturalFauxPas || []),
+        ...(brief.practical.commonScams || []),
       ].slice(0, 6)
     : []
 
@@ -215,6 +227,9 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         )}
         {practical.length > 0 && (
           <IconCard icon="💡" title="Practical Tips" items={practical} color="indigo" />
+        )}
+        {souvenirs.length > 0 && (
+          <IconCard icon="🎁" title="Unique Souvenirs" items={souvenirs} color="purple" />
         )}
       </div>
 

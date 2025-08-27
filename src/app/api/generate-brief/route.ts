@@ -12,36 +12,51 @@ export async function POST(request: NextRequest) {
     const rateLimitResult = checkRateLimit(request)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: rateLimitResult.error,
-          resetTime: rateLimitResult.resetTime
+          resetTime: rateLimitResult.resetTime,
         },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
-          }
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          },
         }
       )
     }
 
-    const { destination, startDate, endDate, categories } = await request.json()
+    const {
+      destination,
+      startDate,
+      endDate,
+      categories,
+      budget = 'standard',
+    } = await request.json()
 
     if (!destination) {
-      return NextResponse.json(
-        { error: 'Destination is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Destination is required' }, { status: 400 })
     }
 
     // Log the request for monitoring
-    console.log(`Travel brief request: ${destination} (${startDate} to ${endDate}) from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`)
+    console.log(
+      `Travel brief request: ${destination} (${startDate} to ${endDate}) from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`
+    )
 
     // Build dynamic prompt based on selected categories
     const buildPrompt = () => {
-      let prompt = `Create a comprehensive travel brief for ${destination} for a trip from ${startDate} to ${endDate}.\n\nPlease return the response as a valid JSON object with the following structure:\n\n{`
-      
+      // Budget-specific instructions
+      const budgetInstructions = {
+        'budget-friendly':
+          'Focus on affordable options, budget accommodations (hostels, budget hotels, Airbnb), free attractions, local eateries, street food, public transportation, and money-saving tips. Prioritize experiences that offer great value without compromising safety.',
+        standard:
+          'Provide mid-range recommendations with good value for money. Include comfortable 3-star accommodations, a mix of local and international dining options, popular attractions with reasonable entry fees, and efficient transportation options.',
+        luxury:
+          'Emphasize premium experiences, luxury accommodations (4-5 star hotels, boutique properties), fine dining restaurants, exclusive attractions, private tours, spa services, and high-end shopping. Include premium transportation options and concierge services.',
+      }
+
+      let prompt = `Create a comprehensive travel brief for ${destination} for a trip from ${startDate} to ${endDate}.\n\nBUDGET LEVEL: ${budget.toUpperCase()} - ${budgetInstructions[budget as keyof typeof budgetInstructions]}\n\nTailor ALL recommendations (accommodations, restaurants, attractions, activities, transportation) to match this budget level while maintaining the same JSON structure.\n\nPlease return the response as a valid JSON object with the following structure:\n\n{`
+
       prompt += `\n  "destination": "${destination}",`
       prompt += `\n  "startDate": "${startDate}",`
       prompt += `\n  "endDate": "${endDate}",`
@@ -79,27 +94,50 @@ export async function POST(request: NextRequest) {
           prompt += `\n    "museums": ["key museums and cultural sites"],`
         }
         if (categories.attractions.experiences) {
-          prompt += `\n    "experiences": ["unique local experiences", "seasonal activities"]`
+          prompt += `\n    "experiences": ["unique local experiences", "seasonal activities"],`
         }
+        prompt += `\n    "offTheBeatenPath": ["lesser-known attractions", "hidden gems", "local secrets"]`
         prompt += `\n  },`
       }
 
       // Food & Drink section
       if (categories?.foodAndDrink?.enabled) {
         prompt += `\n  "foodAndDrink": {`
+
+        // Build array of enabled subcategories to handle commas correctly
+        const enabledSubcategories = []
+
         if (categories.foodAndDrink.restaurants) {
-          prompt += `\n    "localSpecialties": ["must-try dishes", "regional specialties"],`
-          prompt += `\n    "restaurants": ["highly recommended restaurants with brief descriptions"],`
+          enabledSubcategories.push(
+            '"localSpecialties": ["must-try dishes", "regional specialties"]'
+          )
+          enabledSubcategories.push(
+            '"restaurants": ["highly recommended restaurants with brief descriptions"]'
+          )
         }
         if (categories.foodAndDrink.cafes) {
-          prompt += `\n    "cafes": ["notable coffee shops", "local cafe culture"],`
+          enabledSubcategories.push('"cafes": ["notable coffee shops", "local cafe culture"]')
         }
         if (categories.foodAndDrink.bars) {
-          prompt += `\n    "bars": ["popular bars/nightlife areas", "local drinking culture"],`
+          enabledSubcategories.push(
+            '"bars": ["popular bars/nightlife areas", "local drinking culture"]'
+          )
         }
         if (categories.foodAndDrink.streetFood) {
-          prompt += `\n    "streetFood": ["street food recommendations", "food markets"]`
+          enabledSubcategories.push('"streetFood": ["street food recommendations", "food markets"]')
         }
+
+        // Always add tipping at the end
+        enabledSubcategories.push(
+          '"tipping": ["tipping customs", "typical amounts", "where to tip"]'
+        )
+
+        // Join with commas except for the last item
+        for (let i = 0; i < enabledSubcategories.length; i++) {
+          const isLast = i === enabledSubcategories.length - 1
+          prompt += `\n    ${enabledSubcategories[i]}${isLast ? '' : ','}`
+        }
+
         prompt += `\n  },`
       }
 
@@ -182,27 +220,36 @@ export async function POST(request: NextRequest) {
         if (categories.practical.currency) {
           prompt += `\n    "currency": "Local currency name",`
           prompt += `\n    "exchangeRate": "Approximate current exchange rate info",`
-          prompt += `\n    "tipping": ["tipping customs", "typical amounts", "where to tip"],`
         }
+        prompt += `\n    "paymentMethods": ["typical payment methods", "cash vs card acceptance", "mobile payments"],`
         prompt += `\n    "emergency": ["emergency numbers", "important contacts"],`
         if (categories.practical.safety) {
           prompt += `\n    "safety": ["safety tips", "areas to be aware of", "general precautions"],`
         }
+        prompt += `\n    "culturalFauxPas": ["important things to avoid in public", "cultural sensitivities", "respectful behavior tips"],`
+        prompt += `\n    "commonScams": ["tourist scams to watch out for", "how to avoid them"] // only include if location is known for specific scams,`
         if (categories.practical.localNews) {
           prompt += `\n    "localNews": ["current events to be aware of", "travel advisories"]`
         }
-        prompt += `\n  }`
+        prompt += `\n  },`
       }
 
+      // Unique Souvenirs section
+      prompt += `\n  "uniqueSouvenirs": {`
+      prompt += `\n    "traditional": ["authentic local crafts", "traditional items unique to the region"],`
+      prompt += `\n    "specialty": ["local specialty products", "foods/drinks to bring home"],`
+      prompt += `\n    "whereToBuy": ["best places to shop for souvenirs", "local markets vs tourist shops"]`
+      prompt += `\n  }`
+
       prompt += `\n}\n\nProvide specific, actionable information for each requested section. Make sure the response is valid JSON that can be parsed directly.`
-      
+
       return prompt
     }
 
     const prompt = buildPrompt()
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
       temperature: 0.7,
       messages: [
@@ -221,7 +268,17 @@ export async function POST(request: NextRequest) {
     // Parse the JSON response from Claude
     let structuredData
     try {
-      structuredData = JSON.parse(content.text)
+      // Clean up the response text to handle markdown code blocks
+      let cleanedText = content.text.trim()
+
+      // Remove markdown code blocks if present
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '')
+      }
+
+      structuredData = JSON.parse(cleanedText)
     } catch (parseError) {
       console.error('Failed to parse JSON from Claude:', parseError)
       console.error('Raw response:', content.text)
@@ -236,9 +293,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error generating travel brief:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate travel brief' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate travel brief' }, { status: 500 })
   }
 }

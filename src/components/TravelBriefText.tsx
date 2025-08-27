@@ -8,7 +8,7 @@ export default function TravelBriefText({ data }: TravelBriefTextProps) {
   const brief = data.structuredData
 
   const formatList = (items: string[], prefix = '• '): string => {
-    return items.map(item => `${prefix}${item}`).join('\n')
+    return items.map((item) => `${prefix}${item}`).join('\n')
   }
 
   let formattedText = `# Travel Brief for ${brief.destination}
@@ -47,6 +47,9 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     if (brief.attractions.experiences?.length) {
       formattedText += `\n### Unique Experiences\n${formatList(brief.attractions.experiences)}\n`
     }
+    if (brief.attractions.offTheBeatenPath?.length) {
+      formattedText += `\n### Off the Beaten Path\n${formatList(brief.attractions.offTheBeatenPath)}\n`
+    }
   }
 
   // Food & Drink section
@@ -67,15 +70,21 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     if (brief.foodAndDrink.streetFood?.length) {
       formattedText += `\n### Street Food\n${formatList(brief.foodAndDrink.streetFood)}\n`
     }
+    if (brief.foodAndDrink.tipping?.length) {
+      formattedText += `\n### Tipping Customs\n${formatList(brief.foodAndDrink.tipping)}\n`
+    }
   }
 
   // Neighborhoods section
   if (brief.neighborhoods) {
     formattedText += `\n## 🏘️ Neighborhoods & City Layout\n`
     if (brief.neighborhoods.areas?.length) {
-      formattedText += `\n### Key Areas\n${brief.neighborhoods.areas.map(area => 
-        `• **${area.name}**: ${area.character}\n  ${formatList(area.highlights, '  - ')}`
-      ).join('\n\n')}\n`
+      formattedText += `\n### Key Areas\n${brief.neighborhoods.areas
+        .map(
+          (area) =>
+            `• **${area.name}**: ${area.character}\n  ${formatList(area.highlights, '  - ')}`
+        )
+        .join('\n\n')}\n`
     }
     if (brief.neighborhoods.layout?.length) {
       formattedText += `\n### City Layout\n${formatList(brief.neighborhoods.layout)}\n`
@@ -145,8 +154,8 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     if (brief.practical.exchangeRate) {
       formattedText += `**Exchange Rate:** ${brief.practical.exchangeRate}\n`
     }
-    if (brief.practical.tipping?.length) {
-      formattedText += `\n### Tipping Customs\n${formatList(brief.practical.tipping)}\n`
+    if (brief.practical.paymentMethods?.length) {
+      formattedText += `\n### Payment Methods\n${formatList(brief.practical.paymentMethods)}\n`
     }
     if (brief.practical.emergency?.length) {
       formattedText += `\n### Emergency Information\n${formatList(brief.practical.emergency)}\n`
@@ -154,8 +163,28 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     if (brief.practical.safety?.length) {
       formattedText += `\n### Safety Tips\n${formatList(brief.practical.safety)}\n`
     }
+    if (brief.practical.culturalFauxPas?.length) {
+      formattedText += `\n### Cultural Do's and Don'ts\n${formatList(brief.practical.culturalFauxPas)}\n`
+    }
+    if (brief.practical.commonScams?.length) {
+      formattedText += `\n### Common Scams to Avoid\n${formatList(brief.practical.commonScams)}\n`
+    }
     if (brief.practical.localNews?.length) {
       formattedText += `\n### Local News & Current Events\n${formatList(brief.practical.localNews)}\n`
+    }
+  }
+
+  // Unique Souvenirs section
+  if (brief.uniqueSouvenirs) {
+    formattedText += `\n## 🎁 Unique Souvenirs\n`
+    if (brief.uniqueSouvenirs.traditional?.length) {
+      formattedText += `\n### Traditional Items\n${formatList(brief.uniqueSouvenirs.traditional)}\n`
+    }
+    if (brief.uniqueSouvenirs.specialty?.length) {
+      formattedText += `\n### Specialty Products\n${formatList(brief.uniqueSouvenirs.specialty)}\n`
+    }
+    if (brief.uniqueSouvenirs.whereToBuy?.length) {
+      formattedText += `\n### Where to Shop\n${formatList(brief.uniqueSouvenirs.whereToBuy)}\n`
     }
   }
 
@@ -164,9 +193,7 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
       <div className="prose dark:prose-invert max-w-none">
-        <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
-          {formattedText}
-        </div>
+        <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">{formattedText}</div>
       </div>
     </div>
   )
