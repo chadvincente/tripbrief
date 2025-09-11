@@ -267,6 +267,7 @@ export default function AdvancedSearchModal({
                 { key: 'cycling', label: 'Bike routes & rentals' },
                 { key: 'sports', label: 'Local sports & fitness' },
                 { key: 'outdoorActivities', label: 'Hiking & outdoor activities' },
+                { key: 'climbingGyms', label: 'Climbing gyms & rock climbing' },
               ]}
             />
 

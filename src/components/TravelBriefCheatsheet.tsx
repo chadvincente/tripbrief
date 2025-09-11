@@ -4,9 +4,13 @@ import { getCityImageClient, getImageAttribution, type CityImage } from '@/lib/c
 
 interface TravelBriefCheatsheetProps {
   data: TravelBriefResponse
+  onSwitchToFullText?: () => void
 }
 
-export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetProps) {
+export default function TravelBriefCheatsheet({
+  data,
+  onSwitchToFullText,
+}: TravelBriefCheatsheetProps) {
   const brief = data.structuredData
   const [cityImage, setCityImage] = useState<CityImage | null>(null)
   const [imageLoading, setImageLoading] = useState(true)
@@ -33,6 +37,7 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         ...(brief.transportation.publicTransit || []),
         ...(brief.transportation.alternatives || []),
         ...(brief.transportation.tips || []),
+        ...(brief.transportation.bikingInfrastructure || []),
       ].slice(0, 6)
     : []
 
@@ -46,12 +51,21 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
     : []
 
   const food = brief.foodAndDrink
-    ? [
-        ...(brief.foodAndDrink.localSpecialties || []),
-        ...(brief.foodAndDrink.restaurants || []),
-        ...(brief.foodAndDrink.streetFood || []),
-        ...(brief.foodAndDrink.tipping || []),
-      ].slice(0, 6)
+    ? (() => {
+        // Build main food items (leave room for tipping)
+        const mainItems = [
+          ...(brief.foodAndDrink.localSpecialties || []),
+          ...(brief.foodAndDrink.restaurants || []),
+          ...(brief.foodAndDrink.streetFood || []),
+          ...(brief.foodAndDrink.cafes || []),
+          ...(brief.foodAndDrink.bars || []),
+        ].slice(0, 5) // Take max 5 main items
+
+        // Always add tipping at the end if it exists
+        const tippingItems = brief.foodAndDrink.tipping || []
+
+        return [...mainItems, ...tippingItems]
+      })()
     : []
 
   const neighborhoods = brief.neighborhoods
@@ -84,6 +98,7 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
         ...(brief.activeAndSports.cycling || []),
         ...(brief.activeAndSports.sports || []),
         ...(brief.activeAndSports.outdoorActivities || []),
+        ...(brief.activeAndSports.climbingGyms || []),
       ].slice(0, 6)
     : []
 
@@ -142,7 +157,16 @@ export default function TravelBriefCheatsheet({ data }: TravelBriefCheatsheetPro
           ))}
           {items.length > 6 && (
             <li className="text-sm text-gray-500 dark:text-gray-400 italic">
-              ...and {items.length - 6} more
+              {onSwitchToFullText ? (
+                <button
+                  onClick={onSwitchToFullText}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 underline cursor-pointer transition-colors"
+                >
+                  ...and {items.length - 6} more
+                </button>
+              ) : (
+                `...and ${items.length - 6} more`
+              )}
             </li>
           )}
         </ul>

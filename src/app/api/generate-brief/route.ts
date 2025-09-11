@@ -74,10 +74,11 @@ export async function POST(request: NextRequest) {
           prompt += `\n    "paymentMethods": ["metro card info", "app recommendations", "cash vs card"],`
         }
         if (categories.transportation.airport) {
-          prompt += `\n    "tips": ["airport connections", "practical transportation tips"]`
+          prompt += `\n    "tips": ["airport connections", "practical transportation tips"],`
         } else {
-          prompt += `\n    "tips": ["practical transportation tips"]`
+          prompt += `\n    "tips": ["practical transportation tips"],`
         }
+        prompt += `\n    "bikingInfrastructure": ["bike lanes and paths", "cycling safety", "bike-friendly infrastructure"] // include assessment of cycling infrastructure quality`
         prompt += `\n  },`
       }
 
@@ -209,7 +210,10 @@ export async function POST(request: NextRequest) {
           prompt += `\n    "sports": ["local sports venues", "fitness centers", "sports events to watch"],`
         }
         if (categories.activeAndSports.outdoorActivities) {
-          prompt += `\n    "outdoorActivities": ["hiking trails", "outdoor recreation", "nature activities"]`
+          prompt += `\n    "outdoorActivities": ["hiking trails", "outdoor recreation", "nature activities"]${categories.activeAndSports.climbingGyms ? ',' : ''}`
+        }
+        if (categories.activeAndSports.climbingGyms) {
+          prompt += `\n    "climbingGyms": ["climbing gyms and rock climbing spots", "bouldering facilities", "indoor/outdoor climbing options"] // only include if there are climbing facilities at this location`
         }
         prompt += `\n  },`
       }

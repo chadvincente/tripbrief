@@ -36,6 +36,7 @@ const defaultCategories: CategoryOptions = {
     cycling: true,
     sports: true,
     outdoorActivities: true,
+    climbingGyms: true,
   },
   practical: { enabled: true, currency: true, safety: true, localNews: true },
 }
@@ -191,7 +192,7 @@ export default function Home() {
             </div>
 
             {viewMode === 'cheatsheet' ? (
-              <TravelBriefCheatsheet data={result} />
+              <TravelBriefCheatsheet data={result} onSwitchToFullText={() => setViewMode('text')} />
             ) : viewMode === 'text' ? (
               <TravelBriefText data={result} />
             ) : (

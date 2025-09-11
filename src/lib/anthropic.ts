@@ -50,6 +50,7 @@ export type CategoryOptions = {
     cycling: boolean
     sports: boolean
     outdoorActivities: boolean
+    climbingGyms: boolean
   }
   practical: {
     enabled: boolean
@@ -78,6 +79,7 @@ export type StructuredTravelBrief = {
     alternatives?: string[]
     paymentMethods?: string[]
     tips?: string[]
+    bikingInfrastructure?: string[]
   }
   attractions?: {
     mustSee?: string[]
@@ -120,6 +122,7 @@ export type StructuredTravelBrief = {
     cycling?: string[]
     sports?: string[]
     outdoorActivities?: string[]
+    climbingGyms?: string[]
   }
   practical?: {
     currency?: string

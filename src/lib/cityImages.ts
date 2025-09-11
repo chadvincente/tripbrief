@@ -26,7 +26,7 @@ export interface CityImage {
   url: string
   photographer?: string
   photographer_url?: string
-  source: 'pexels' | 'fallback'
+  source: 'wikimedia' | 'pexels' | 'fallback'
 }
 
 // Cache for city images (in-memory, could be enhanced with localStorage)
@@ -45,6 +45,163 @@ const FALLBACK_IMAGES: Record<string, string> = {
 }
 
 const DEFAULT_FALLBACK = '/images/cities/default-cityscape.svg'
+
+// Wikimedia Commons API interfaces
+interface WikimediaPage {
+  pageid: number
+  title: string
+  imageinfo?: Array<{
+    url: string
+    descriptionurl: string
+    user?: string
+    timestamp: string
+    width: number
+    height: number
+  }>
+}
+
+interface WikimediaSearchResult {
+  query?: {
+    pages?: Record<string, WikimediaPage>
+  }
+}
+
+async function searchWikimediaCommons(cityName: string): Promise<CityImage | null> {
+  try {
+    // Clean city name for better searching
+    const cleanCityName = cityName
+      .replace(/,.*$/, '') // Remove country part
+      .replace(/\s+(city|municipality|prefecture)$/i, '')
+      .trim()
+
+    console.log(`🔍 Searching Wikimedia for: ${cleanCityName}`)
+
+    // Multiple search strategies for better results - optimized based on Wikimedia structure
+    const searchTerms = [
+      `${cleanCityName} skyline`,
+      `${cleanCityName} downtown skyline`,
+      `${cleanCityName} cityscape`,
+      `${cleanCityName} panorama`,
+      `${cleanCityName} downtown`,
+      `${cleanCityName} aerial`,
+      `${cleanCityName}`, // Fallback to just city name
+    ]
+
+    for (const searchTerm of searchTerms) {
+      console.log(`  🔎 Trying search term: "${searchTerm}"`)
+
+      // Search for images using the MediaWiki API
+      const searchUrl = new URL('https://commons.wikimedia.org/w/api.php')
+      searchUrl.searchParams.set('action', 'query')
+      searchUrl.searchParams.set('format', 'json')
+      searchUrl.searchParams.set('generator', 'search')
+      searchUrl.searchParams.set('gsrnamespace', '6') // File namespace
+      searchUrl.searchParams.set('gsrsearch', `filetype:bitmap "${searchTerm}"`)
+      searchUrl.searchParams.set('gsrlimit', '15') // Increased from 10 for more options
+      searchUrl.searchParams.set('prop', 'imageinfo')
+      searchUrl.searchParams.set('iiprop', 'url|user|timestamp|dimensions')
+      searchUrl.searchParams.set('iiurlwidth', '1200') // Request larger thumbnail
+      searchUrl.searchParams.set('origin', '*') // CORS header
+
+      const response = await fetch(searchUrl.toString())
+
+      if (!response.ok) {
+        console.error(`Wikimedia API error: ${response.status}`)
+        continue
+      }
+
+      const data: WikimediaSearchResult = await response.json()
+
+      if (data.query?.pages) {
+        const pages = Object.values(data.query.pages)
+        console.log(`    📊 Found ${pages.length} images for "${searchTerm}"`)
+
+        // Log all found images for debugging
+        pages.forEach((page, i) => {
+          if (page.imageinfo?.[0]) {
+            const imageInfo = page.imageinfo[0]
+            console.log(`      ${i + 1}. ${page.title} (${imageInfo.width}x${imageInfo.height})`)
+          }
+        })
+
+        // Sort pages by quality score before filtering
+        const scoredPages = pages
+          .map((page) => {
+            if (!page.imageinfo?.[0]) return { page, score: 0 }
+
+            const imageInfo = page.imageinfo[0]
+            const title = page.title.toLowerCase()
+            const isLandscape = imageInfo.width > imageInfo.height
+            const aspectRatio = imageInfo.width / imageInfo.height
+
+            let score = 0
+
+            // Size bonus (prefer higher resolution)
+            score += Math.min(imageInfo.width / 1000, 3) // Max 3 points for width
+            score += Math.min(imageInfo.height / 1000, 2) // Max 2 points for height
+
+            // Aspect ratio bonus (prefer landscape 1.5:1 to 3:1)
+            if (aspectRatio >= 1.5 && aspectRatio <= 3) score += 3
+            else if (isLandscape) score += 1
+
+            // Keyword scoring - more specific terms get higher scores
+            if (title.includes('skyline')) score += 10
+            if (title.includes('downtown')) score += 8
+            if (title.includes('cityscape')) score += 7
+            if (title.includes('panorama')) score += 6
+            if (title.includes('aerial')) score += 5
+            if (title.includes('view')) score += 3
+
+            // Negative scoring for unwanted content
+            if (title.includes('portrait')) score -= 10
+            if (title.includes('people')) score -= 5
+            if (title.includes('person')) score -= 5
+            if (title.includes('sunset') || title.includes('sunrise')) score -= 2 // Often too artistic
+            if (title.includes('night')) score -= 1 // Prefer daytime shots
+
+            return { page, score }
+          })
+          .sort((a, b) => b.score - a.score)
+
+        // Filter for decent quality images (score > 5)
+        const cityImages = scoredPages.filter(({ score }) => score > 5).map(({ page }) => page)
+
+        // Log scoring for debugging
+        scoredPages.slice(0, 5).forEach(({ page, score }, i) => {
+          console.log(`      ${i + 1}. ${page.title} (score: ${score})`)
+        })
+
+        if (cityImages.length > 0) {
+          console.log(`      ✅ SELECTED: ${cityImages[0].title}`)
+        }
+
+        console.log(`    ✨ ${cityImages.length} images passed filtering`)
+
+        // Use the best match if available, otherwise first result
+        const selectedPage = cityImages.length > 0 ? cityImages[0] : pages[0]
+
+        if (selectedPage?.imageinfo?.[0]) {
+          const imageInfo = selectedPage.imageinfo[0]
+          console.log(`    🎯 Final selection: ${selectedPage.title}`)
+
+          return {
+            url: imageInfo.url,
+            photographer: imageInfo.user,
+            photographer_url: imageInfo.descriptionurl,
+            source: 'wikimedia',
+          }
+        }
+      } else {
+        console.log(`    ❌ No results for "${searchTerm}"`)
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error('Error fetching from Wikimedia Commons:', error)
+    return null
+  }
+}
 
 async function searchPexelsAPI(cityName: string): Promise<CityImage | null> {
   const apiKey = process.env.PEXELS_API_KEY
@@ -196,7 +353,14 @@ export async function getCityImage(cityName: string): Promise<CityImage> {
     return cached
   }
 
-  // Try Pexels API
+  // Try Wikimedia Commons first (best for iconic city images)
+  const wikimediaImage = await searchWikimediaCommons(cleanCityName)
+  if (wikimediaImage) {
+    setCachedImage(cleanCityName, wikimediaImage)
+    return wikimediaImage
+  }
+
+  // Fallback to Pexels API
   const pexelsImage = await searchPexelsAPI(cleanCityName)
   if (pexelsImage) {
     setCachedImage(cleanCityName, pexelsImage)
@@ -210,6 +374,9 @@ export async function getCityImage(cityName: string): Promise<CityImage> {
 }
 
 export function getImageAttribution(image: CityImage): string | null {
+  if (image.source === 'wikimedia' && image.photographer) {
+    return `Photo by ${image.photographer} on Wikimedia Commons`
+  }
   if (image.source === 'pexels' && image.photographer) {
     return `Photo by ${image.photographer} on Pexels`
   }

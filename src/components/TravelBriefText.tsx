@@ -30,6 +30,9 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     if (brief.transportation.tips?.length) {
       formattedText += `\n### Transportation Tips\n${formatList(brief.transportation.tips)}\n`
     }
+    if (brief.transportation.bikingInfrastructure?.length) {
+      formattedText += `\n### Biking Infrastructure\n${formatList(brief.transportation.bikingInfrastructure)}\n`
+    }
   }
 
   // Attractions section
@@ -142,6 +145,9 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     }
     if (brief.activeAndSports.outdoorActivities?.length) {
       formattedText += `\n### Hiking & Outdoor Activities\n${formatList(brief.activeAndSports.outdoorActivities)}\n`
+    }
+    if (brief.activeAndSports.climbingGyms?.length) {
+      formattedText += `\n### Climbing Gyms & Rock Climbing\n${formatList(brief.activeAndSports.climbingGyms)}\n`
     }
   }
 
