@@ -7,6 +7,7 @@ import TravelBriefText from '@/components/TravelBriefText'
 import TravelMap from '@/components/TravelMap'
 import Footer from '@/components/Footer'
 import AdvancedSearchModal from '@/components/AdvancedSearchModal'
+import MonthSelector from '@/components/MonthSelector'
 import { track } from '@vercel/analytics'
 import Script from 'next/script'
 
@@ -49,6 +50,7 @@ export default function Home() {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const [categories, setCategories] = useState<CategoryOptions>(defaultCategories)
   const [budget, setBudget] = useState<BudgetOption>('standard')
+  const [travelMonth, setTravelMonth] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -57,8 +59,20 @@ export default function Home() {
 
     const formData = new FormData(e.currentTarget)
     const destination = formData.get('destination') as string
-    const startDate = formData.get('startDate') as string
-    const endDate = formData.get('endDate') as string
+    // Use state value for travelMonth since it's now a controlled component
+
+    // Convert month to start/end dates for API compatibility
+    let startDate = ''
+    let endDate = ''
+    if (travelMonth) {
+      // Use current year since we're only getting the month
+      const currentYear = new Date().getFullYear()
+      const month = parseInt(travelMonth)
+      const startOfMonth = new Date(currentYear, month - 1, 1)
+      const endOfMonth = new Date(currentYear, month, 0)
+      startDate = startOfMonth.toISOString().split('T')[0]
+      endDate = endOfMonth.toISOString().split('T')[0]
+    }
 
     if (!destination.trim()) {
       setError('Please enter a destination')
@@ -78,9 +92,10 @@ export default function Home() {
       // Track the search event with both analytics platforms
       const searchData = {
         destination: destination.trim(),
+        travelMonth: travelMonth || null,
         startDate: startDate || null,
         endDate: endDate || null,
-        hasDateRange: !!(startDate && endDate),
+        hasTravelMonth: !!travelMonth,
         enabledCategories: enabledCategories.join(','),
         categoryCount,
         isCustomized,
@@ -96,11 +111,11 @@ export default function Home() {
           `destination-${searchData.destination.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
         )
 
-        // Track whether dates were provided
-        if (searchData.hasDateRange) {
-          window.umami.track('search-with-date-range')
+        // Track whether travel month was provided
+        if (searchData.hasTravelMonth) {
+          window.umami.track('search-with-travel-month')
         } else {
-          window.umami.track('search-without-dates')
+          window.umami.track('search-without-travel-month')
         }
       }
 
@@ -211,8 +226,8 @@ export default function Home() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">TripBrief</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get comprehensive travel information for any destination in seconds. From public transit
-            to local culture, we&apos;ve got you covered.
+            Get comprehensive travel information for any destination in seconds. Select a travel
+            month for seasonal recommendations, or leave it blank for general information.
           </p>
         </div>
 
@@ -235,35 +250,20 @@ export default function Home() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="startDate"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Travel Date
-                </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  name="startDate"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="endDate"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Return Date
-                </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  name="endDate"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="travelMonth"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Travel Month <span className="text-gray-500 dark:text-gray-400">(Optional)</span>
+              </label>
+              <MonthSelector
+                id="travelMonth"
+                name="travelMonth"
+                value={travelMonth}
+                onChange={setTravelMonth}
+                className="w-full"
+              />
             </div>
 
             {error && (
@@ -293,8 +293,7 @@ export default function Home() {
                 onClick={() => setShowAdvancedSearch(true)}
                 className="w-full text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium py-2 transition duration-200 flex items-center justify-center"
               >
-                🎯 Advanced Options
-                <span className="ml-2 text-sm">(Customize categories)</span>
+                Advanced Options
               </button>
             </div>
           </form>
