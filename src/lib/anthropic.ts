@@ -143,7 +143,8 @@ export type StructuredTravelBrief = {
 
 export type TravelBriefResponse = {
   structuredData: StructuredTravelBrief
-  destination: string
-  startDate: string
-  endDate: string
+  destination?: string
+  startDate?: string
+  endDate?: string
+  fullText?: string
 }

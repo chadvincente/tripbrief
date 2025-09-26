@@ -205,12 +205,6 @@ export default function TravelBriefCheatsheet({
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
             📍 {brief.destination}
           </h1>
-          {brief.startDate && brief.endDate && (
-            <p className="text-xl text-white drop-shadow-md">
-              {new Date(brief.startDate).toLocaleDateString()} -{' '}
-              {new Date(brief.endDate).toLocaleDateString()}
-            </p>
-          )}
         </div>
 
         {/* Optional: Image Attribution (not required for Pexels, but nice to have) */}
