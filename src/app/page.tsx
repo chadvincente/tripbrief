@@ -75,7 +75,7 @@ export default function Home() {
     }
 
     if (!destination.trim()) {
-      setError('Please enter a destination')
+      setError('Please enter a city')
       setLoading(false)
       return
     }
@@ -137,18 +137,48 @@ export default function Home() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        if (response.status === 429) {
-          const resetTime = new Date(errorData.resetTime)
-          const waitMinutes = Math.ceil((resetTime.getTime() - Date.now()) / (1000 * 60))
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch (jsonError) {
+          // If we can't parse the error response, show a friendly message
           throw new Error(
-            `${errorData.error} Please wait ${waitMinutes} minute${waitMinutes !== 1 ? 's' : ''} before trying again.`
+            "Sorry, we've hit a temporary snag. Please give it another shot, or try again later."
           )
         }
-        throw new Error(errorData.error || 'Failed to generate travel brief')
+
+        if (response.status === 429) {
+          // Handle rate limiting (both our rate limit and Anthropic's)
+          if (errorData.resetTime) {
+            const resetTime = new Date(errorData.resetTime)
+            const waitMinutes = Math.ceil((resetTime.getTime() - Date.now()) / (1000 * 60))
+            throw new Error(
+              `${errorData.error} Please wait ${waitMinutes} minute${waitMinutes !== 1 ? 's' : ''} before trying again.`
+            )
+          } else {
+            throw new Error(
+              errorData.error ||
+                "We're experiencing high demand. Please wait a moment and try again."
+            )
+          }
+        }
+
+        throw new Error(
+          errorData.error ||
+            "Sorry, we've hit a temporary snag. Please give it another shot, or try again later."
+        )
       }
 
-      const data: TravelBriefResponse = await response.json()
+      let data: TravelBriefResponse
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        // If we can't parse the successful response, show a friendly message
+        throw new Error(
+          "Sorry, we've hit a temporary snag. Please give it another shot, or try again later."
+        )
+      }
+
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -226,8 +256,8 @@ export default function Home() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">TripBrief</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get comprehensive travel information for any destination in seconds. Select a travel
-            month for seasonal recommendations, or leave it blank for general information.
+            Get comprehensive travel information for any city in seconds. Select a travel month for
+            seasonal recommendations, or leave it blank for general information.
           </p>
         </div>
 
@@ -238,13 +268,13 @@ export default function Home() {
                 htmlFor="destination"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Destination
+                City
               </label>
               <input
                 type="text"
                 id="destination"
                 name="destination"
-                placeholder="e.g., Tokyo, Japan"
+                placeholder="e.g., Tokyo, Paris, New York"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />

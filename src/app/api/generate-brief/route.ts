@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt()
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4000,
       temperature: 0.7,
       messages: [
@@ -297,6 +297,41 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error generating travel brief:', error)
-    return NextResponse.json({ error: 'Failed to generate travel brief' }, { status: 500 })
+
+    // Handle specific Anthropic API errors
+    if (error instanceof Error) {
+      // Check for timeout/disconnection errors
+      if (error.message.includes('timeout') || error.message.includes('disconnect')) {
+        return NextResponse.json(
+          {
+            error:
+              "Sorry, we've hit a temporary snag. Please give it another shot, or try again later.",
+            type: 'timeout',
+          },
+          { status: 503 }
+        )
+      }
+
+      // Check for rate limit errors from Anthropic
+      if (error.message.includes('rate_limit') || error.message.includes('429')) {
+        return NextResponse.json(
+          {
+            error: "We're experiencing high demand. Please wait a moment and try again.",
+            type: 'rate_limit',
+          },
+          { status: 429 }
+        )
+      }
+    }
+
+    // Generic error fallback
+    return NextResponse.json(
+      {
+        error:
+          "Sorry, we've hit a temporary snag. Please give it another shot, or try again later.",
+        type: 'generic',
+      },
+      { status: 500 }
+    )
   }
 }
