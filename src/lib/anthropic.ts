@@ -147,4 +147,39 @@ export type TravelBriefResponse = {
   startDate?: string
   endDate?: string
   fullText?: string
+  hasExtendedDetails?: boolean
+}
+
+export type ExtendedTravelBrief = {
+  attractions?: {
+    mustSee?: string[]
+    photoSpots?: string[]
+    museums?: string[]
+    experiences?: string[]
+    offTheBeatenPath?: string[]
+  }
+  cultureAndEvents?: {
+    events?: string[]
+    sportsEvents?: string[]
+    customs?: string[]
+    etiquette?: string[]
+    language?: string[]
+  }
+  dayTrips?: {
+    nearbyDestinations?: string[]
+    transportation?: string[]
+    duration?: string[]
+  }
+  activeAndSports?: {
+    running?: string[]
+    cycling?: string[]
+    sports?: string[]
+    outdoorActivities?: string[]
+    climbingGyms?: string[]
+  }
+  uniqueSouvenirs?: {
+    traditional?: string[]
+    specialty?: string[]
+    whereToBuy?: string[]
+  }
 }

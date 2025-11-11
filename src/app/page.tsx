@@ -44,6 +44,7 @@ const defaultCategories: CategoryOptions = {
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<TravelBriefResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'cheatsheet' | 'text' | 'map'>('cheatsheet')
@@ -55,19 +56,60 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
+    setProgress(0)
     setError(null)
+
+    // Simulate progress with easing - reaches 95% in ~18 seconds, then slows dramatically
+    const startTime = Date.now()
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const seconds = elapsed / 1000
+
+      // Easing function: fast at start, very slow at end
+      // Reaches 95% at 18 seconds, then crawls to 99%
+      let newProgress
+      if (seconds < 18) {
+        // Logarithmic growth to 95% over 18 seconds
+        newProgress = 95 * (1 - Math.exp(-seconds / 6))
+      } else {
+        // Very slow crawl from 95% to 99%
+        newProgress = 95 + 4 * (1 - Math.exp(-(seconds - 18) / 10))
+      }
+
+      setProgress(Math.min(newProgress, 99))
+    }, 100)
+
+    // Store interval ID to clear it later
+    ;(window as any).progressInterval = progressInterval
 
     const formData = new FormData(e.currentTarget)
     const destination = formData.get('destination') as string
     // Use state value for travelMonth since it's now a controlled component
 
-    // Convert month to start/end dates for API compatibility
+    // Convert month to human-readable format for the prompt
+    let travelMonthText = ''
     let startDate = ''
     let endDate = ''
     if (travelMonth) {
-      // Use current year since we're only getting the month
       const currentYear = new Date().getFullYear()
       const month = parseInt(travelMonth)
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ]
+      travelMonthText = `${monthNames[month - 1]} ${currentYear}`
+
+      // Keep dates for backwards compatibility
       const startOfMonth = new Date(currentYear, month - 1, 1)
       const endOfMonth = new Date(currentYear, month, 0)
       startDate = startOfMonth.toISOString().split('T')[0]
@@ -129,6 +171,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           destination: destination.trim(),
+          travelMonth: travelMonthText,
           startDate,
           endDate,
           categories,
@@ -179,11 +222,25 @@ export default function Home() {
         )
       }
 
+      // Clear progress interval and jump to 100%
+      if ((window as any).progressInterval) {
+        clearInterval((window as any).progressInterval)
+      }
+      setProgress(100)
+
+      // Small delay to show 100% before hiding
+      await new Promise((resolve) => setTimeout(resolve, 300))
+
       setResult(data)
     } catch (err) {
+      // Clear progress interval on error
+      if ((window as any).progressInterval) {
+        clearInterval((window as any).progressInterval)
+      }
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setLoading(false)
+      setProgress(0)
     }
   }
 
@@ -309,9 +366,17 @@ export default function Home() {
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:transform-none"
               >
                 {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Generating Your Travel Brief...
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center">
+                      Generating Your Travel Brief...
+                    </div>
+                    <div className="w-full bg-blue-800 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-white h-full transition-all duration-300 ease-out"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-blue-100">{Math.round(progress)}%</div>
                   </div>
                 ) : (
                   'Generate My Travel Brief'
