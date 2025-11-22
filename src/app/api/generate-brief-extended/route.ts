@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         prompt += `\n  },`
       }
 
-      // Physical Activities section
+      // Staying Active section
       if (categories?.activeAndSports?.enabled) {
         prompt += `\n  "activeAndSports": {`
         if (categories.activeAndSports.running) {

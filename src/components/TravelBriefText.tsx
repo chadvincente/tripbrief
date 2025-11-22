@@ -131,9 +131,9 @@ ${brief.startDate && brief.endDate ? `**Travel Dates:** ${new Date(brief.startDa
     }
   }
 
-  // Physical Activities section
+  // Staying Active section
   if (brief.activeAndSports) {
-    formattedText += `\n## 🏃 Physical Activities\n`
+    formattedText += `\n## 🏃 Staying Active\n`
     if (brief.activeAndSports.running?.length) {
       formattedText += `\n### Running Routes & Parks\n${formatList(brief.activeAndSports.running)}\n`
     }

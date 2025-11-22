@@ -1,6 +1,7 @@
 import type { TravelBriefResponse } from '@/lib/anthropic'
 import { useState, useEffect } from 'react'
 import { getCityImageClient, getImageAttribution, type CityImage } from '@/lib/cityImages'
+import { countryCodeToFlag, toTitleCase } from '@/lib/utils'
 
 interface TravelBriefCheatsheetProps {
   data: TravelBriefResponse
@@ -203,7 +204,8 @@ export default function TravelBriefCheatsheet({
         {/* Header Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-            📍 {brief.destination}
+            {brief.countryCode ? countryCodeToFlag(brief.countryCode) : '🌍'}{' '}
+            {toTitleCase(brief.destination)}
           </h1>
         </div>
 
@@ -234,17 +236,11 @@ export default function TravelBriefCheatsheet({
         {neighborhoods.length > 0 && (
           <IconCard icon="🏘️" title="Neighborhoods" items={neighborhoods} color="purple" />
         )}
-        {events.length > 0 && (
-          <IconCard icon="🎭" title="Culture & Events" items={events} color="red" />
-        )}
         {dayTrips.length > 0 && (
           <IconCard icon="🗺️" title="Day Trips" items={dayTrips} color="indigo" />
         )}
         {activeAndSports.length > 0 && (
-          <IconCard icon="🏃" title="Physical Activities" items={activeAndSports} color="green" />
-        )}
-        {practical.length > 0 && (
-          <IconCard icon="💡" title="Practical Tips" items={practical} color="indigo" />
+          <IconCard icon="🏃" title="Staying Active" items={activeAndSports} color="green" />
         )}
         {souvenirs.length > 0 && (
           <IconCard icon="🎁" title="Unique Souvenirs" items={souvenirs} color="purple" />
@@ -264,17 +260,11 @@ export default function TravelBriefCheatsheet({
           />
           <QuickFactCard
             title="Language Tips"
-            content={
-              brief.cultureAndEvents?.language?.slice(0, 2).join(', ') || 'Learn basic greetings'
-            }
+            content={brief.practical?.language?.join(', ') || 'Learn basic greetings'}
           />
           <QuickFactCard
             title="Currency & Exchange"
-            content={
-              brief.practical?.currency && brief.practical?.exchangeRate
-                ? `${brief.practical.currency} - ${brief.practical.exchangeRate}`
-                : 'Check current exchange rates'
-            }
+            content={brief.practical?.currency || 'Check current exchange rates'}
           />
         </div>
       </div>

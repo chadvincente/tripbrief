@@ -72,6 +72,8 @@ export type TravelBriefRequest = {
 
 export type StructuredTravelBrief = {
   destination: string
+  country?: string
+  countryCode?: string
   startDate: string
   endDate: string
   transportation?: {
@@ -126,6 +128,7 @@ export type StructuredTravelBrief = {
   }
   practical?: {
     currency?: string
+    language?: string[]
     exchangeRate?: string
     paymentMethods?: string[]
     emergency?: string[]

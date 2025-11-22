@@ -259,7 +259,7 @@ export default function AdvancedSearchModal({
             />
 
             <CategorySection
-              title="Physical Activities"
+              title="Staying Active"
               icon="🏃"
               mainKey="activeAndSports"
               subCategories={[
