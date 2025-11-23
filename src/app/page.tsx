@@ -246,48 +246,57 @@ export default function Home() {
 
   if (result) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex justify-center items-center gap-4 mb-6">
+      <div className="min-h-screen bg-swiss-white">
+        {/* Geometric accent elements */}
+        <div
+          className="fixed top-0 right-0 w-96 h-96 bg-swiss-yellow opacity-20 -z-10"
+          style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}
+        />
+        <div className="fixed bottom-0 left-0 w-64 h-64 bg-swiss-blue opacity-10 -z-10" />
+
+        <main className="container mx-auto px-6 py-12">
+          <div className="max-w-7xl mx-auto">
+            {/* Header with Swiss typography */}
+            <div className="mb-12 border-b-3 border-swiss-black pb-8">
+              <div className="flex items-center justify-between">
                 <button
                   onClick={() => setResult(null)}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition duration-200"
+                  className="px-6 py-3 bg-swiss-black text-swiss-white hover:bg-swiss-gray-800 transition-colors font-medium tracking-tight"
                 >
-                  ← New Search
+                  ← NEW SEARCH
                 </button>
 
-                <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
+                {/* View mode switcher - Swiss style */}
+                <div className="flex gap-0 border-3 border-swiss-black">
                   <button
                     onClick={() => setViewMode('cheatsheet')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
+                    className={`px-6 py-3 text-sm font-semibold tracking-wide transition-all ${
                       viewMode === 'cheatsheet'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                        ? 'bg-swiss-black text-swiss-white'
+                        : 'bg-swiss-white text-swiss-black hover:bg-swiss-gray-100'
                     }`}
                   >
-                    📋 Cheatsheet
+                    CHEATSHEET
                   </button>
                   <button
                     onClick={() => setViewMode('text')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
+                    className={`px-6 py-3 text-sm font-semibold tracking-wide transition-all border-l-3 border-r-3 border-swiss-black ${
                       viewMode === 'text'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                        ? 'bg-swiss-black text-swiss-white'
+                        : 'bg-swiss-white text-swiss-black hover:bg-swiss-gray-100'
                     }`}
                   >
-                    📄 Full Text
+                    FULL TEXT
                   </button>
                   <button
                     onClick={() => setViewMode('map')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
+                    className={`px-6 py-3 text-sm font-semibold tracking-wide transition-all ${
                       viewMode === 'map'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                        ? 'bg-swiss-black text-swiss-white'
+                        : 'bg-swiss-white text-swiss-black hover:bg-swiss-gray-100'
                     }`}
                   >
-                    🗺️ Map
+                    MAP
                   </button>
                 </div>
               </div>
@@ -308,142 +317,187 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
-      <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">TripBrief</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get comprehensive travel information for any city in seconds. Select a travel month for
-            seasonal recommendations, or leave it blank for general information.
-          </p>
+    <div className="min-h-screen bg-swiss-white flex flex-col relative overflow-hidden">
+      {/* Geometric background elements - Swiss style */}
+      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-swiss-red opacity-5 -z-10" />
+      <div className="fixed top-1/4 left-0 w-24 h-96 bg-swiss-blue -z-10" />
+      <div
+        className="fixed bottom-0 right-1/4 w-72 h-72 bg-swiss-yellow opacity-30 -z-10"
+        style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0 100%)' }}
+      />
+
+      <main className="container mx-auto px-6 py-16 flex-1">
+        {/* Hero section - Bold Swiss typography */}
+        <div className="max-w-6xl mx-auto mb-16">
+          <div className="relative flex items-start justify-between gap-12">
+            {/* Red accent bar */}
+            <div className="absolute -left-6 top-0 w-2 h-32 bg-swiss-red" />
+
+            <div>
+              <h1 className="text-display font-bold text-swiss-black leading-none">
+                TRIP
+                <br />
+                BRIEF
+              </h1>
+            </div>
+
+            <div className="flex-1 max-w-xl pt-8">
+              <p className="text-h4 text-swiss-gray-600 font-light leading-relaxed">
+                Comprehensive travel information for any city in seconds.
+              </p>
+              <p className="text-body-lg text-swiss-gray-500 mt-3">
+                Select a travel month for seasonal recommendations, or leave it blank for general
+                information.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="destination"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                City
-              </label>
-              <input
-                type="text"
-                id="destination"
-                name="destination"
-                placeholder="e.g., Tokyo, Paris, New York"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              />
-            </div>
+        {/* Form - Grid-based Swiss layout */}
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-swiss-white border-6 border-swiss-black p-12 relative">
+            {/* Yellow corner accent */}
+            <div
+              className="absolute top-0 right-0 w-24 h-24 bg-swiss-yellow -z-10"
+              style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}
+            />
 
-            <div>
-              <label
-                htmlFor="travelMonth"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Travel Month <span className="text-gray-500 dark:text-gray-400">(Optional)</span>
-              </label>
-              <MonthSelector
-                id="travelMonth"
-                name="travelMonth"
-                value={travelMonth}
-                onChange={setTravelMonth}
-                className="w-full"
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded">
-                {error}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-12 gap-6 items-start">
+                <label
+                  htmlFor="destination"
+                  className="col-span-3 text-caption font-semibold text-swiss-black uppercase tracking-widest pt-4"
+                >
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="destination"
+                  name="destination"
+                  placeholder="Tokyo, Paris, New York..."
+                  required
+                  className="col-span-9 px-0 py-4 border-0 border-b-3 border-swiss-black bg-transparent focus:outline-none focus:border-swiss-blue text-h4 font-medium text-swiss-black placeholder:text-swiss-gray-400 transition-colors"
+                />
               </div>
-            )}
 
-            <div className="space-y-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:transform-none"
-              >
-                {loading ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center">
-                      Generating Your Travel Brief...
-                    </div>
-                    <div className="w-full bg-blue-800 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-white h-full transition-all duration-300 ease-out"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                    <div className="text-xs text-blue-100">{Math.round(progress)}%</div>
-                  </div>
-                ) : (
-                  'Generate My Travel Brief'
-                )}
-              </button>
+              <div className="grid grid-cols-12 gap-6 items-start">
+                <label
+                  htmlFor="travelMonth"
+                  className="col-span-3 text-caption font-semibold text-swiss-black uppercase tracking-widest pt-4"
+                >
+                  Month
+                  <br />
+                  <span className="text-swiss-gray-500 font-normal">(Optional)</span>
+                </label>
+                <div className="col-span-9">
+                  <MonthSelector
+                    id="travelMonth"
+                    name="travelMonth"
+                    value={travelMonth}
+                    onChange={setTravelMonth}
+                    className="w-full"
+                  />
+                </div>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setShowAdvancedSearch(true)}
-                className="w-full text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium py-2 transition duration-200 flex items-center justify-center"
-              >
-                Advanced Options
-              </button>
-            </div>
-          </form>
+              {error && (
+                <div className="border-l-6 border-swiss-red bg-swiss-red bg-opacity-5 px-6 py-4">
+                  <p className="text-body text-swiss-red font-medium">{error}</p>
+                </div>
+              )}
+
+              <div className="space-y-4 pt-6">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-swiss-blue hover:bg-swiss-blue-dark disabled:bg-swiss-gray-400 disabled:cursor-not-allowed text-swiss-white font-bold py-6 px-8 transition-colors text-h4 tracking-wide uppercase"
+                >
+                  {loading ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-center text-body-lg tracking-wider">
+                        GENERATING TRAVEL BRIEF...
+                      </div>
+                      <div className="w-full bg-swiss-blue-dark h-2 overflow-hidden">
+                        <div
+                          className="bg-swiss-yellow h-full transition-all duration-300 ease-out"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-caption font-semibold tracking-widest">
+                        {Math.round(progress)}%
+                      </div>
+                    </div>
+                  ) : (
+                    'Generate Travel Brief'
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedSearch(true)}
+                  className="w-full text-swiss-black hover:text-swiss-blue font-semibold py-4 transition-colors flex items-center justify-center text-body uppercase tracking-wide border-3 border-swiss-black hover:border-swiss-blue"
+                >
+                  Advanced Options
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              🚇
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Transportation
+        {/* Features Grid - Swiss style */}
+        <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-0 max-w-6xl mx-auto border-3 border-swiss-black">
+          <div className="p-10 border-b-3 md:border-b-0 md:border-r-3 border-swiss-black relative group hover:bg-swiss-blue transition-colors">
+            <div className="absolute top-0 left-0 w-12 h-3 bg-swiss-red" />
+            <div className="text-h1 mb-6 group-hover:grayscale">🚇</div>
+            <h3 className="text-h3 font-bold text-swiss-black mb-3 group-hover:text-swiss-white transition-colors">
+              TRANSPORTATION
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Public transit info, rideshare options, and local transportation tips
+            <p className="text-body text-swiss-gray-600 leading-relaxed group-hover:text-swiss-white transition-colors">
+              Public transit, rideshare options, and local transportation
             </p>
           </div>
 
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              📸
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Attractions
+          <div className="p-10 border-b-3 md:border-b-0 md:border-r-3 border-swiss-black relative group hover:bg-swiss-yellow transition-colors">
+            <div className="absolute top-0 left-0 w-12 h-3 bg-swiss-blue" />
+            <div className="text-h1 mb-6 group-hover:grayscale">📸</div>
+            <h3 className="text-h3 font-bold text-swiss-black mb-3 transition-colors">
+              ATTRACTIONS
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-body text-swiss-gray-600 leading-relaxed transition-colors">
               Must-see sights, photo spots, and hidden gems
             </p>
           </div>
 
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              🍽️
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Local Life</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="p-10 relative group hover:bg-swiss-red transition-colors">
+            <div className="absolute top-0 left-0 w-12 h-3 bg-swiss-yellow" />
+            <div className="text-h1 mb-6 group-hover:grayscale">🍽️</div>
+            <h3 className="text-h3 font-bold text-swiss-black mb-3 group-hover:text-swiss-white transition-colors">
+              LOCAL LIFE
+            </h3>
+            <p className="text-body text-swiss-gray-600 leading-relaxed group-hover:text-swiss-white transition-colors">
               Restaurants, cafes, culture, and local insights
             </p>
           </div>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="mt-20 max-w-2xl mx-auto bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-8 text-center">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              ✈️ Get Travel Tips & Updates
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Join fellow travelers for destination insights, new features, and curated travel tips
-              delivered to your inbox.
-            </p>
-          </div>
+        {/* Newsletter Signup - Swiss style */}
+        <div className="mt-24 max-w-3xl mx-auto bg-swiss-black p-12 relative overflow-hidden">
+          <div
+            className="absolute top-0 right-0 w-48 h-48 bg-swiss-yellow opacity-20"
+            style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}
+          />
 
-          {/* MailerLite Form */}
-          <div className="ml-embedded" data-form="SSrfUE"></div>
+          <div className="relative z-10">
+            <h2 className="text-h2 font-bold text-swiss-white mb-4 tracking-tight">
+              GET TRAVEL TIPS & UPDATES
+            </h2>
+            <p className="text-body-lg text-swiss-gray-300 mb-8 max-w-xl">
+              Join fellow travelers for destination insights, new features, and curated travel tips.
+            </p>
+
+            {/* MailerLite Form */}
+            <div className="ml-embedded" data-form="SSrfUE"></div>
+          </div>
         </div>
       </main>
       <Footer />

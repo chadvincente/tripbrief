@@ -122,6 +122,7 @@ export default function TravelBriefCheatsheet({
       ].slice(0, 6)
     : []
 
+  // Swiss style card component
   const IconCard = ({
     icon,
     title,
@@ -133,108 +134,131 @@ export default function TravelBriefCheatsheet({
     items: string[]
     color?: string
   }) => {
-    const colorClasses = {
-      blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-      green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-      purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
-      orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
-      red: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
-      indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
+    // Swiss color accents
+    const accentColors = {
+      blue: 'bg-swiss-blue',
+      green: 'bg-swiss-yellow',
+      purple: 'bg-swiss-red',
+      orange: 'bg-swiss-yellow',
+      red: 'bg-swiss-red',
+      indigo: 'bg-swiss-blue',
     }
 
     return (
-      <div
-        className={`p-6 rounded-xl border-2 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.blue} h-full`}
-      >
-        <div className="flex items-center mb-4">
-          <span className="text-3xl mr-3">{icon}</span>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
+      <div className="bg-swiss-white border-3 border-swiss-black h-full relative group hover:bg-swiss-gray-50 transition-colors">
+        {/* Geometric accent element */}
+        <div
+          className={`absolute top-0 right-0 w-16 h-16 ${accentColors[color as keyof typeof accentColors] || accentColors.blue} opacity-20`}
+          style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}
+        />
+
+        <div className="p-8">
+          {/* Header with icon and title */}
+          <div className="flex items-start mb-6 pb-4 border-b-3 border-swiss-black">
+            <span className="text-5xl mr-4 leading-none">{icon}</span>
+            <h3 className="text-h3 font-bold text-swiss-black uppercase tracking-tight leading-tight pt-2">
+              {title}
+            </h3>
+          </div>
+
+          {/* List items */}
+          <ul className="space-y-3">
+            {items.slice(0, 6).map((item, index) => (
+              <li
+                key={index}
+                className="text-body text-swiss-black leading-relaxed flex items-start"
+              >
+                <span className="mr-3 text-swiss-red font-bold">■</span>
+                <span className="flex-1">{item}</span>
+              </li>
+            ))}
+            {items.length > 6 && (
+              <li className="text-body-sm text-swiss-gray-600 italic pt-2">
+                {onSwitchToFullText ? (
+                  <button
+                    onClick={onSwitchToFullText}
+                    className="hover:text-swiss-blue font-semibold transition-colors uppercase tracking-wide"
+                  >
+                    +{items.length - 6} MORE →
+                  </button>
+                ) : (
+                  `+${items.length - 6} more`
+                )}
+              </li>
+            )}
+          </ul>
         </div>
-        <ul className="space-y-2">
-          {items.slice(0, 6).map((item, index) => (
-            <li key={index} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              • {item}
-            </li>
-          ))}
-          {items.length > 6 && (
-            <li className="text-sm text-gray-500 dark:text-gray-400 italic">
-              {onSwitchToFullText ? (
-                <button
-                  onClick={onSwitchToFullText}
-                  className="hover:text-blue-600 dark:hover:text-blue-400 underline cursor-pointer transition-colors"
-                >
-                  ...and {items.length - 6} more
-                </button>
-              ) : (
-                `...and ${items.length - 6} more`
-              )}
-            </li>
-          )}
-        </ul>
       </div>
     )
   }
 
+  // Swiss style quick fact card
   const QuickFactCard = ({ title, content }: { title: string; content: string }) => (
-    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{title}</h4>
-      <p className="text-sm text-gray-700 dark:text-gray-300">{content}</p>
+    <div className="bg-swiss-black p-6 relative overflow-hidden group hover:bg-swiss-blue transition-colors">
+      <div className="absolute bottom-0 right-0 w-12 h-12 bg-swiss-yellow opacity-30 group-hover:opacity-50 transition-opacity" />
+      <h4 className="font-bold text-caption text-swiss-white uppercase tracking-widest mb-3">
+        {title}
+      </h4>
+      <p className="text-body-lg text-swiss-white font-medium leading-relaxed">{content}</p>
     </div>
   )
 
   return (
-    <div className="space-y-8">
-      {/* Header with Background Image */}
-      <div className="relative rounded-xl overflow-hidden">
-        {/* Background Image */}
-        {imageLoading ? (
-          <div className="h-64 bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse" />
-        ) : (
+    <div className="space-y-12">
+      {/* Swiss Style Hero Header */}
+      <div className="relative border-6 border-swiss-black bg-swiss-white overflow-hidden">
+        {/* Asymmetric background color block */}
+        <div className="absolute top-0 right-0 w-2/5 h-full bg-swiss-red opacity-10" />
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-swiss-blue opacity-5" />
+
+        {/* Background Image with blend mode */}
+        {!imageLoading && cityImage && (
           <div
-            className="h-64 bg-cover bg-center bg-gray-200 dark:bg-gray-700"
+            className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-multiply"
             style={{
-              backgroundImage: cityImage ? `url(${cityImage.url})` : undefined,
+              backgroundImage: `url(${cityImage.url})`,
             }}
           />
         )}
 
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        {/* Header Content - Swiss Typography */}
+        <div className="relative z-10 p-12 md:p-16">
+          <div className="max-w-4xl">
+            {/* Red accent bar */}
+            <div className="w-24 h-2 bg-swiss-red mb-8" />
 
-        {/* Header Content */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
-          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-            {brief.countryCode ? countryCodeToFlag(brief.countryCode) : '🌍'}{' '}
-            {toTitleCase(brief.destination)}
-          </h1>
+            <h1 className="text-display font-bold text-swiss-black leading-none mb-6">
+              {brief.countryCode ? countryCodeToFlag(brief.countryCode) : '🌍'}
+              <br />
+              {toTitleCase(brief.destination).toUpperCase()}
+            </h1>
+
+            {(data.travelMonth || (brief.startDate && brief.endDate)) && (
+              <p className="text-h4 font-medium text-swiss-gray-700 tracking-wide">
+                {data.travelMonth || `${brief.startDate} — ${brief.endDate}`}
+              </p>
+            )}
+          </div>
+
+          {/* Yellow geometric accent */}
+          <div
+            className="absolute bottom-0 right-0 w-48 h-48 bg-swiss-yellow opacity-30"
+            style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
+          />
         </div>
-
-        {/* Optional: Image Attribution (not required for Pexels, but nice to have) */}
-        {false &&
-          cityImage &&
-          (() => {
-            const attribution = getImageAttribution(cityImage!)
-            return (
-              attribution && (
-                <div className="absolute bottom-2 right-2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                  {attribution}
-                </div>
-              )
-            )
-          })()}
       </div>
 
-      {/* Main Info Cards Grid */}
+      {/* Main Info Cards Grid - Swiss Grid System */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {transportation.length > 0 && (
           <IconCard icon="🚇" title="Transportation" items={transportation} color="blue" />
         )}
-        {attractions.length > 0 && (
-          <IconCard icon="📸" title="Must-See Attractions" items={attractions} color="green" />
-        )}
-        {food.length > 0 && <IconCard icon="🍽️" title="Food & Drink" items={food} color="orange" />}
         {neighborhoods.length > 0 && (
           <IconCard icon="🏘️" title="Neighborhoods" items={neighborhoods} color="purple" />
+        )}
+        {food.length > 0 && <IconCard icon="🍽️" title="Food & Drink" items={food} color="orange" />}
+        {attractions.length > 0 && (
+          <IconCard icon="📸" title="Attractions" items={attractions} color="green" />
         )}
         {dayTrips.length > 0 && (
           <IconCard icon="🗺️" title="Day Trips" items={dayTrips} color="indigo" />
@@ -247,31 +271,45 @@ export default function TravelBriefCheatsheet({
         )}
       </div>
 
-      {/* Quick Facts */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">⚡</span>
-          Quick Reference
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <QuickFactCard
-            title="Emergency Numbers"
-            content={brief.practical?.emergency?.join(', ') || 'Check local emergency services'}
-          />
-          <QuickFactCard
-            title="Language Tips"
-            content={brief.practical?.language?.join(', ') || 'Learn basic greetings'}
-          />
-          <QuickFactCard
-            title="Currency & Exchange"
-            content={brief.practical?.currency || 'Check current exchange rates'}
-          />
+      {/* Quick Reference - Swiss Style */}
+      <div className="bg-swiss-black border-6 border-swiss-black p-10 relative overflow-hidden">
+        {/* Geometric accent */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-swiss-yellow opacity-20" />
+        <div
+          className="absolute bottom-0 right-0 w-48 h-48 bg-swiss-red opacity-10"
+          style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
+        />
+
+        <div className="relative z-10">
+          <h3 className="text-h2 font-bold text-swiss-white mb-8 uppercase tracking-tight flex items-center border-b-3 border-swiss-white pb-4">
+            <span className="mr-4 text-swiss-yellow">⚡</span>
+            Quick Reference
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <QuickFactCard
+              title="Emergency Numbers"
+              content={brief.practical?.emergency?.join(', ') || 'Check local emergency services'}
+            />
+            <QuickFactCard
+              title="Language Tips"
+              content={brief.practical?.language?.join(', ') || 'Learn basic greetings'}
+            />
+            <QuickFactCard
+              title="Currency & Exchange"
+              content={brief.practical?.currency || 'Check current exchange rates'}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Footer Note */}
-      <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-        Generated by TripBrief • Double-check current information before traveling
+      {/* Footer Note - Swiss Style */}
+      <div className="text-center border-t-3 border-swiss-black pt-8">
+        <p className="text-caption text-swiss-gray-600 uppercase tracking-widest font-semibold">
+          Generated by TripBrief
+        </p>
+        <p className="text-body-sm text-swiss-gray-500 mt-2">
+          Double-check current information before traveling
+        </p>
       </div>
     </div>
   )

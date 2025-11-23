@@ -149,6 +149,7 @@ export type TravelBriefResponse = {
   destination?: string
   startDate?: string
   endDate?: string
+  travelMonth?: string
   fullText?: string
   hasExtendedDetails?: boolean
 }

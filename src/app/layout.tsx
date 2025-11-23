@@ -1,16 +1,30 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
+})
 
 export const metadata: Metadata = {
   title: 'TripBrief - AI Travel Planning & City Guides | Instant Travel Briefs',
-  description: 'Generate comprehensive travel guides for any destination in seconds. Get instant information on transportation, attractions, food, culture, and local tips. AI-powered travel planning made simple.',
-  keywords: ['travel planning', 'city guide', 'travel tips', 'destination guide', 'travel information', 'AI travel', 'travel brief', 'travel companion'],
+  description:
+    'Generate comprehensive travel guides for any destination in seconds. Get instant information on transportation, attractions, food, culture, and local tips. AI-powered travel planning made simple.',
+  keywords: [
+    'travel planning',
+    'city guide',
+    'travel tips',
+    'destination guide',
+    'travel information',
+    'AI travel',
+    'travel brief',
+    'travel companion',
+  ],
   authors: [{ name: 'TripBrief' }],
   creator: 'TripBrief',
   publisher: 'TripBrief',
@@ -31,7 +45,8 @@ export const metadata: Metadata = {
     url: 'https://tripbrief.io',
     siteName: 'TripBrief',
     title: 'TripBrief - AI Travel Planning & City Guides',
-    description: 'Generate comprehensive travel guides for any destination in seconds. Get instant information on transportation, attractions, food, culture, and local tips.',
+    description:
+      'Generate comprehensive travel guides for any destination in seconds. Get instant information on transportation, attractions, food, culture, and local tips.',
     images: [
       {
         url: '/og-image.png',
@@ -44,7 +59,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TripBrief - AI Travel Planning & City Guides',
-    description: 'Generate comprehensive travel guides for any destination in seconds. Transportation, attractions, food, culture, and local tips.',
+    description:
+      'Generate comprehensive travel guides for any destination in seconds. Transportation, attractions, food, culture, and local tips.',
     images: ['/og-image.png'],
   },
   alternates: {
@@ -52,14 +68,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={spaceGrotesk.className}>
         {process.env.NODE_ENV === 'production' && (
           <Script
             defer
@@ -68,7 +80,7 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
-        
+
         {/* MailerLite Universal */}
         <Script id="mailerlite-universal" strategy="afterInteractive">
           {`
@@ -82,30 +94,31 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
-        
+
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              "name": "TripBrief",
-              "description": "AI-powered travel planning tool that generates comprehensive travel guides for any destination in seconds.",
-              "url": "https://tripbrief.io",
-              "applicationCategory": "TravelApplication",
-              "operatingSystem": "Web",
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'TripBrief',
+              description:
+                'AI-powered travel planning tool that generates comprehensive travel guides for any destination in seconds.',
+              url: 'https://tripbrief.io',
+              applicationCategory: 'TravelApplication',
+              operatingSystem: 'Web',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
               },
-              "creator": {
-                "@type": "Organization",
-                "name": "TripBrief"
+              creator: {
+                '@type': 'Organization',
+                name: 'TripBrief',
               },
-              "keywords": "travel planning, city guide, travel tips, AI travel, destination guide"
-            })
+              keywords: 'travel planning, city guide, travel tips, AI travel, destination guide',
+            }),
           }}
         />
       </body>

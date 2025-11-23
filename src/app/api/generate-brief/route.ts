@@ -322,6 +322,7 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
       destination,
       startDate,
       endDate,
+      travelMonth, // Include travel month for display
       fullText: content.text, // Also return the raw text for debugging
     })
   } catch (error) {
