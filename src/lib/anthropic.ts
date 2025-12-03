@@ -142,6 +142,19 @@ export type StructuredTravelBrief = {
     specialty?: string[]
     whereToBuy?: string[]
   }
+  localLife?: {
+    everydayActivities?: string[]
+    majorEvents?: string[]
+    souvenirs?: string[]
+  }
+  bestSights?: {
+    vantagePoints?: string[]
+    photoSpots?: string[]
+  }
+  culture?: {
+    customs?: string[]
+    fauxPas?: string[]
+  }
 }
 
 export type TravelBriefResponse = {
@@ -155,35 +168,17 @@ export type TravelBriefResponse = {
 }
 
 export type ExtendedTravelBrief = {
-  attractions?: {
-    mustSee?: string[]
+  localLife?: {
+    everydayActivities?: string[]
+    majorEvents?: string[]
+    souvenirs?: string[]
+  }
+  bestSights?: {
+    vantagePoints?: string[]
     photoSpots?: string[]
-    museums?: string[]
-    experiences?: string[]
-    offTheBeatenPath?: string[]
   }
-  cultureAndEvents?: {
-    events?: string[]
-    sportsEvents?: string[]
+  culture?: {
     customs?: string[]
-    etiquette?: string[]
-    language?: string[]
-  }
-  dayTrips?: {
-    nearbyDestinations?: string[]
-    transportation?: string[]
-    duration?: string[]
-  }
-  activeAndSports?: {
-    running?: string[]
-    cycling?: string[]
-    sports?: string[]
-    outdoorActivities?: string[]
-    climbingGyms?: string[]
-  }
-  uniqueSouvenirs?: {
-    traditional?: string[]
-    specialty?: string[]
-    whereToBuy?: string[]
+    fauxPas?: string[]
   }
 }

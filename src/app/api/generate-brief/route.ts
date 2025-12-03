@@ -10,7 +10,7 @@ const anthropic = new Anthropic({
 export async function POST(request: NextRequest) {
   try {
     // Check rate limits first
-    const rateLimitResult = checkRateLimit(request)
+    const rateLimitResult = await checkRateLimit(request)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {
@@ -103,29 +103,21 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
       if (categories?.neighborhoods?.enabled) {
         prompt += `## Neighborhoods
 - [General city geography/layout overview]
-- [Neighborhood 1]: [location relative to city geography, character, why visit]
-- [Neighborhood 2]: [location relative to city geography, character, why visit]
-- [Neighborhood 3]: [location relative to city geography, character, why visit]
-- [Where to stay: best area recommendation]
+- [Neighborhood 1]: [location, character, why visit]
+- [Neighborhood 2]: [location, character, why visit]
+- [Neighborhood 3]: [location, character, why visit]
+- Where to Stay: [Best area recommendation with reasoning]
 
 `
       }
 
       if (categories?.attractions?.enabled) {
         prompt += `## Attractions
-- [Must-see 1]
-- [Must-see 2]
-- [Must-see 3]
-- [Hidden gem 1]
-- [Hidden gem 2]
-
-`
-      }
-
-      if (categories?.cultureAndEvents?.enabled) {
-        prompt += `## Culture & Events
-- Events: [Festivals/events during visit - be specific]
-- Customs: [2-3 key cultural norms]
+- [Must-see attraction 1]
+- [Must-see attraction 2]
+- [Must-see attraction 3]
+- [Hidden gem or off-the-beaten-path spot 1]
+- [Hidden gem or off-the-beaten-path spot 2]
 
 `
       }
@@ -278,11 +270,6 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
           sections.attractions = {
             mustSee: bullets.slice(0, 3),
             offTheBeatenPath: bullets.slice(3),
-          }
-        } else if (sectionName === 'Culture & Events') {
-          sections.cultureAndEvents = {
-            events: keyValues['Events'] ? [keyValues['Events']] : [],
-            customs: keyValues['Customs'] ? [keyValues['Customs']] : [],
           }
         } else if (sectionName === 'Day Trips') {
           sections.dayTrips = {

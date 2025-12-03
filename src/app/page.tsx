@@ -6,41 +6,9 @@ import TravelBriefCheatsheet from '@/components/TravelBriefCheatsheet'
 import TravelBriefText from '@/components/TravelBriefText'
 import TravelMap from '@/components/TravelMap'
 import Footer from '@/components/Footer'
-import AdvancedSearchModal from '@/components/AdvancedSearchModal'
 import MonthSelector from '@/components/MonthSelector'
 import { track } from '@vercel/analytics'
 import Script from 'next/script'
-
-// Default category settings (all enabled)
-const defaultCategories: CategoryOptions = {
-  transportation: { enabled: true, publicTransit: true, alternatives: true, airport: true },
-  attractions: {
-    enabled: true,
-    museums: true,
-    landmarks: true,
-    viewpoints: true,
-    experiences: true,
-  },
-  foodAndDrink: { enabled: true, restaurants: true, streetFood: true, bars: true, cafes: true },
-  neighborhoods: { enabled: true, layout: true, whereToStay: true, character: true },
-  cultureAndEvents: {
-    enabled: true,
-    events: true,
-    sportsEvents: true,
-    customs: true,
-    language: true,
-  },
-  dayTrips: { enabled: true, nearbyDestinations: true, transportation: true, duration: true },
-  activeAndSports: {
-    enabled: true,
-    running: true,
-    cycling: true,
-    sports: true,
-    outdoorActivities: true,
-    climbingGyms: true,
-  },
-  practical: { enabled: true, currency: true, safety: true, localNews: true },
-}
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
@@ -48,9 +16,6 @@ export default function Home() {
   const [result, setResult] = useState<TravelBriefResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'cheatsheet' | 'text' | 'map'>('cheatsheet')
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
-  const [categories, setCategories] = useState<CategoryOptions>(defaultCategories)
-  const [budget, setBudget] = useState<BudgetOption>('standard')
   const [travelMonth, setTravelMonth] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -91,8 +56,14 @@ export default function Home() {
     let startDate = ''
     let endDate = ''
     if (travelMonth) {
-      const currentYear = new Date().getFullYear()
-      const month = parseInt(travelMonth)
+      const currentDate = new Date()
+      const currentYear = currentDate.getFullYear()
+      const currentMonth = currentDate.getMonth() // 0-indexed (0 = January, 11 = December)
+      const selectedMonth = parseInt(travelMonth) - 1 // Convert to 0-indexed
+
+      // If the selected month has already passed this year, use next year
+      const year = selectedMonth <= currentMonth ? currentYear + 1 : currentYear
+
       const monthNames = [
         'January',
         'February',
@@ -107,11 +78,11 @@ export default function Home() {
         'November',
         'December',
       ]
-      travelMonthText = `${monthNames[month - 1]} ${currentYear}`
+      travelMonthText = `${monthNames[selectedMonth]} ${year}`
 
       // Keep dates for backwards compatibility
-      const startOfMonth = new Date(currentYear, month - 1, 1)
-      const endOfMonth = new Date(currentYear, month, 0)
+      const startOfMonth = new Date(year, selectedMonth, 1)
+      const endOfMonth = new Date(year, selectedMonth + 1, 0)
       startDate = startOfMonth.toISOString().split('T')[0]
       endDate = endOfMonth.toISOString().split('T')[0]
     }
@@ -123,13 +94,43 @@ export default function Home() {
     }
 
     try {
-      // Analyze enabled categories for analytics
-      const enabledCategories = Object.entries(categories)
-        .filter(([_, config]) => config.enabled)
-        .map(([key, _]) => key)
-
-      const categoryCount = enabledCategories.length
-      const isCustomized = categoryCount < 8 // Less than all 8 categories
+      // All categories enabled by default
+      const categories: CategoryOptions = {
+        transportation: { enabled: true, publicTransit: true, alternatives: true, airport: true },
+        attractions: {
+          enabled: true,
+          museums: true,
+          landmarks: true,
+          viewpoints: true,
+          experiences: true,
+        },
+        foodAndDrink: {
+          enabled: true,
+          restaurants: true,
+          streetFood: true,
+          bars: true,
+          cafes: true,
+        },
+        neighborhoods: { enabled: true, layout: true, whereToStay: true, character: true },
+        cultureAndEvents: {
+          enabled: true,
+          events: true,
+          sportsEvents: true,
+          customs: true,
+          language: true,
+        },
+        dayTrips: { enabled: true, nearbyDestinations: true, transportation: true, duration: true },
+        activeAndSports: {
+          enabled: true,
+          running: true,
+          cycling: true,
+          sports: true,
+          outdoorActivities: true,
+          climbingGyms: true,
+        },
+        practical: { enabled: true, currency: true, safety: true, localNews: true },
+      }
+      const budget: BudgetOption = 'standard'
 
       // Track the search event with both analytics platforms
       const searchData = {
@@ -138,9 +139,6 @@ export default function Home() {
         startDate: startDate || null,
         endDate: endDate || null,
         hasTravelMonth: !!travelMonth,
-        enabledCategories: enabledCategories.join(','),
-        categoryCount,
-        isCustomized,
       }
 
       // Umami Analytics (custom analytics)
@@ -385,7 +383,7 @@ export default function Home() {
                   htmlFor="travelMonth"
                   className="col-span-3 text-caption font-semibold text-swiss-black uppercase tracking-widest pt-4"
                 >
-                  Month
+                  Travel Month
                   <br />
                   <span className="text-swiss-gray-500 font-normal">(Optional)</span>
                 </label>
@@ -406,7 +404,7 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="space-y-4 pt-6">
+              <div className="pt-6">
                 <button
                   type="submit"
                   disabled={loading}
@@ -430,14 +428,6 @@ export default function Home() {
                   ) : (
                     'Generate Travel Brief'
                   )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedSearch(true)}
-                  className="w-full text-swiss-black hover:text-swiss-blue font-semibold py-4 transition-colors flex items-center justify-center text-body uppercase tracking-wide border-3 border-swiss-black hover:border-swiss-blue"
-                >
-                  Advanced Options
                 </button>
               </div>
             </form>
@@ -501,15 +491,6 @@ export default function Home() {
         </div>
       </main>
       <Footer />
-
-      <AdvancedSearchModal
-        isOpen={showAdvancedSearch}
-        onClose={() => setShowAdvancedSearch(false)}
-        categories={categories}
-        onCategoriesChange={setCategories}
-        budget={budget}
-        onBudgetChange={setBudget}
-      />
     </div>
   )
 }

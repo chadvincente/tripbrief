@@ -57,17 +57,17 @@ export default function MonthSelector({
       {/* Hidden input for form submission */}
       <input type="hidden" name={name} id={id} value={selectedMonth} />
 
-      {/* Month Button Grid */}
+      {/* Month Button Grid - Swiss Style */}
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
         {months.map((month) => (
           <button
             key={month.value}
             type="button"
             onClick={() => handleMonthClick(month.value)}
-            className={`px-3 py-2 md:px-4 md:py-3 rounded-lg text-sm font-medium transition-all duration-200 border-2 ${
+            className={`px-3 py-2 md:px-4 md:py-3 text-sm font-semibold transition-all duration-200 border-3 uppercase tracking-wide ${
               selectedMonth === month.value
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
-                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-sm'
+                ? 'bg-swiss-blue text-swiss-white border-swiss-blue'
+                : 'bg-swiss-white text-swiss-black border-swiss-black hover:bg-swiss-yellow hover:border-swiss-black'
             }`}
             title={month.fullLabel}
           >
@@ -76,18 +76,18 @@ export default function MonthSelector({
         ))}
       </div>
 
-      {/* Clear button - only show if a month is selected */}
-      {selectedMonth && (
-        <div className="mt-3 text-center">
-          <button
-            type="button"
-            onClick={() => handleMonthClick(selectedMonth)}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-          >
-            Clear selection
-          </button>
-        </div>
-      )}
+      {/* Clear button - always reserve space to prevent layout shift */}
+      <div className="mt-3 text-center h-6">
+        <button
+          type="button"
+          onClick={() => handleMonthClick(selectedMonth)}
+          className={`text-body-sm font-medium text-swiss-gray-600 hover:text-swiss-blue transition-colors uppercase tracking-wide ${
+            selectedMonth ? 'visible' : 'invisible'
+          }`}
+        >
+          Clear selection
+        </button>
+      </div>
     </div>
   )
 }

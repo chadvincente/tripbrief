@@ -1,119 +1,106 @@
-interface RateLimitEntry {
-  count: number
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+interface RateLimitResult {
+  allowed: boolean
+  remaining: number
   resetTime: number
+  error?: string
 }
 
-interface RateLimitStore {
-  [key: string]: RateLimitEntry
+// Initialize Redis client (uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN from env)
+let redis: Redis | null = null
+let minuteRateLimiter: Ratelimit | null = null
+let hourRateLimiter: Ratelimit | null = null
+
+try {
+  redis = Redis.fromEnv()
+
+  // 3 requests per minute with sliding window
+  minuteRateLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, '60 s'),
+    analytics: true,
+    prefix: 'tripbrief:ratelimit',
+  })
+
+  // 30 requests per hour with sliding window
+  hourRateLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, '3600 s'),
+    analytics: true,
+    prefix: 'tripbrief:ratelimit',
+  })
+} catch (error) {
+  console.warn('Upstash Redis not configured - rate limiting will be disabled in this environment')
 }
-
-class RateLimiter {
-  private store: RateLimitStore = {}
-  private readonly windowMs: number
-  private readonly maxRequests: number
-
-  constructor(windowMs: number = 60 * 1000, maxRequests: number = 5) {
-    this.windowMs = windowMs
-    this.maxRequests = maxRequests
-    
-    // Clean up expired entries every 5 minutes
-    setInterval(() => {
-      this.cleanup()
-    }, 5 * 60 * 1000)
-  }
-
-  private cleanup() {
-    const now = Date.now()
-    Object.keys(this.store).forEach(key => {
-      if (this.store[key].resetTime < now) {
-        delete this.store[key]
-      }
-    })
-  }
-
-  check(identifier: string): { allowed: boolean; remaining: number; resetTime: number } {
-    const now = Date.now()
-    const entry = this.store[identifier]
-
-    if (!entry || entry.resetTime < now) {
-      // First request or window expired
-      this.store[identifier] = {
-        count: 1,
-        resetTime: now + this.windowMs
-      }
-      return {
-        allowed: true,
-        remaining: this.maxRequests - 1,
-        resetTime: now + this.windowMs
-      }
-    }
-
-    if (entry.count >= this.maxRequests) {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetTime: entry.resetTime
-      }
-    }
-
-    entry.count++
-    return {
-      allowed: true,
-      remaining: this.maxRequests - entry.count,
-      resetTime: entry.resetTime
-    }
-  }
-}
-
-// Create rate limiter instances
-export const minuteRateLimiter = new RateLimiter(60 * 1000, 3) // 3 requests per minute
-export const hourRateLimiter = new RateLimiter(60 * 60 * 1000, 10) // 10 requests per hour
 
 export function getClientIP(request: Request): string {
   // Try to get real IP from headers (Vercel provides these)
   const forwarded = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
-  
+
   if (realIp) {
     return realIp
   }
-  
+
   // Fallback
   return 'unknown'
 }
 
-export function checkRateLimit(request: Request) {
+export async function checkRateLimit(request: Request): Promise<RateLimitResult> {
   const ip = getClientIP(request)
-  
-  // Check minute limit first (more restrictive)
-  const minuteCheck = minuteRateLimiter.check(ip)
-  if (!minuteCheck.allowed) {
+
+  // If rate limiters aren't configured (e.g., local dev), allow all requests
+  if (!minuteRateLimiter || !hourRateLimiter) {
     return {
-      allowed: false,
-      error: 'Too many requests. Please wait a moment before trying again.',
-      resetTime: minuteCheck.resetTime,
-      remaining: minuteCheck.remaining
+      allowed: true,
+      remaining: 999,
+      resetTime: Date.now() + 60000,
     }
   }
-  
-  // Check hour limit
-  const hourCheck = hourRateLimiter.check(`${ip}_hour`)
-  if (!hourCheck.allowed) {
-    return {
-      allowed: false,
-      error: 'Hourly limit exceeded. Please try again later.',
-      resetTime: hourCheck.resetTime,
-      remaining: hourCheck.remaining
+
+  try {
+    // Check minute limit first (more restrictive)
+    const minuteResult = await minuteRateLimiter.limit(`${ip}:minute`)
+
+    if (!minuteResult.success) {
+      return {
+        allowed: false,
+        error: 'Too many requests. Please wait a moment before trying again.',
+        resetTime: minuteResult.reset,
+        remaining: minuteResult.remaining,
+      }
     }
-  }
-  
-  return {
-    allowed: true,
-    remaining: Math.min(minuteCheck.remaining, hourCheck.remaining),
-    resetTime: minuteCheck.resetTime
+
+    // Check hour limit
+    const hourResult = await hourRateLimiter.limit(`${ip}:hour`)
+
+    if (!hourResult.success) {
+      return {
+        allowed: false,
+        error: 'Hourly limit exceeded. Please try again later.',
+        resetTime: hourResult.reset,
+        remaining: hourResult.remaining,
+      }
+    }
+
+    return {
+      allowed: true,
+      remaining: Math.min(minuteResult.remaining, hourResult.remaining),
+      resetTime: minuteResult.reset,
+    }
+  } catch (error) {
+    // If rate limiting fails, log error but allow the request through
+    console.error('Rate limit check failed:', error)
+    return {
+      allowed: true,
+      remaining: 999,
+      resetTime: Date.now() + 60000,
+    }
   }
 }

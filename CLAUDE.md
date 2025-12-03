@@ -85,19 +85,32 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 The application is optimized for Vercel deployment:
 
 1. **Connect your GitHub repository** to Vercel
-2. **Set environment variables**:
+2. **Set up Upstash Redis** (required for rate limiting):
+   - Go to [Upstash Console](https://console.upstash.com/)
+   - Create a free account if you don't have one
+   - Click "Create Database" → Select "Redis"
+   - Choose a database name (e.g., "tripbrief-ratelimit")
+   - Select your region (choose closest to your users)
+   - Choose "Global" for multi-region or "Regional" for single region
+   - Copy the REST API credentials (URL and Token)
+3. **Set environment variables** in Vercel:
    - `ANTHROPIC_API_KEY` (required)
-   - Optional: `RATE_LIMIT_REQUESTS_PER_MINUTE` and `RATE_LIMIT_REQUESTS_PER_HOUR`
-3. **Deploy** - Vercel handles the build automatically
+   - `UPSTASH_REDIS_REST_URL` (from Upstash dashboard)
+   - `UPSTASH_REDIS_REST_TOKEN` (from Upstash dashboard)
+4. **Deploy** - Vercel handles the build automatically
 
 ### Rate Limiting
 
-Production includes IP-based rate limiting to protect against excessive API costs:
+Production uses Upstash Redis for distributed rate limiting to protect against excessive API costs:
 
-- 3 requests per minute per IP
-- 10 requests per hour per IP
-- Automatic cleanup of expired rate limit entries
-- Graceful error handling with retry information
+- **3 requests per minute** per IP (sliding window)
+- **30 requests per hour** per IP (sliding window)
+- Shared state across all serverless function instances
+- Built-in analytics for monitoring usage patterns
+- Graceful fallback if Redis is unavailable (allows requests through)
+- Proper HTTP 429 responses with `Retry-After` headers
+
+**Upstash Free Tier**: 10,000 requests/day - more than enough for moderate traffic!
 
 ### Analytics & Monitoring
 

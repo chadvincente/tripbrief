@@ -1,4 +1,4 @@
-import type { TravelBriefResponse } from '@/lib/anthropic'
+import type { TravelBriefResponse, ExtendedTravelBrief } from '@/lib/anthropic'
 import { useState, useEffect } from 'react'
 import { getCityImageClient, getImageAttribution, type CityImage } from '@/lib/cityImages'
 import { countryCodeToFlag, toTitleCase } from '@/lib/utils'
@@ -15,6 +15,9 @@ export default function TravelBriefCheatsheet({
   const brief = data.structuredData
   const [cityImage, setCityImage] = useState<CityImage | null>(null)
   const [imageLoading, setImageLoading] = useState(true)
+  const [extendedData, setExtendedData] = useState<ExtendedTravelBrief | null>(null)
+  const [loadingExtended, setLoadingExtended] = useState(false)
+  const [showExtended, setShowExtended] = useState(false)
 
   // Fetch city image
   useEffect(() => {
@@ -31,6 +34,38 @@ export default function TravelBriefCheatsheet({
 
     fetchCityImage()
   }, [brief.destination])
+
+  // Fetch extended details
+  const fetchExtendedDetails = async () => {
+    if (extendedData || loadingExtended) return // Don't fetch if already loaded or loading
+
+    setLoadingExtended(true)
+    try {
+      const response = await fetch('/api/generate-brief-extended', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destination: brief.destination,
+          countryCode: brief.countryCode,
+          travelMonth: data.travelMonth,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch extended details')
+      }
+
+      const result = await response.json()
+      setExtendedData(result.extendedData)
+      setShowExtended(true)
+    } catch (error) {
+      console.error('Error fetching extended details:', error)
+    } finally {
+      setLoadingExtended(false)
+    }
+  }
 
   // Combine related arrays for display with safe defaults
   const transportation = brief.transportation
@@ -76,15 +111,6 @@ export default function TravelBriefCheatsheet({
       ].slice(0, 6)
     : []
 
-  const events = brief.cultureAndEvents
-    ? [
-        ...(brief.cultureAndEvents.events || []),
-        ...(brief.cultureAndEvents.sportsEvents || []),
-        ...(brief.cultureAndEvents.customs || []),
-        ...(brief.cultureAndEvents.language || []),
-      ].slice(0, 6)
-    : []
-
   const dayTrips = brief.dayTrips
     ? [
         ...(brief.dayTrips.nearbyDestinations || []),
@@ -103,14 +129,6 @@ export default function TravelBriefCheatsheet({
       ].slice(0, 6)
     : []
 
-  const souvenirs = brief.uniqueSouvenirs
-    ? [
-        ...(brief.uniqueSouvenirs.traditional || []),
-        ...(brief.uniqueSouvenirs.specialty || []),
-        ...(brief.uniqueSouvenirs.whereToBuy || []),
-      ].slice(0, 6)
-    : []
-
   const practical = brief.practical
     ? [
         ...(brief.practical.currency ? [`Currency: ${brief.practical.currency}`] : []),
@@ -120,6 +138,26 @@ export default function TravelBriefCheatsheet({
         ...(brief.practical.culturalFauxPas || []),
         ...(brief.practical.commonScams || []),
       ].slice(0, 6)
+    : []
+
+  // Extended sections (loaded on demand)
+  const localLife = extendedData?.localLife
+    ? [
+        ...(extendedData.localLife.everydayActivities || []),
+        ...(extendedData.localLife.majorEvents || []),
+        ...(extendedData.localLife.souvenirs || []),
+      ]
+    : []
+
+  const bestSights = extendedData?.bestSights
+    ? [
+        ...(extendedData.bestSights.vantagePoints || []),
+        ...(extendedData.bestSights.photoSpots || []),
+      ]
+    : []
+
+  const culture = extendedData?.culture
+    ? [...(extendedData.culture.customs || []), ...(extendedData.culture.fauxPas || [])]
     : []
 
   // Swiss style card component
@@ -266,10 +304,38 @@ export default function TravelBriefCheatsheet({
         {activeAndSports.length > 0 && (
           <IconCard icon="🏃" title="Staying Active" items={activeAndSports} color="green" />
         )}
-        {souvenirs.length > 0 && (
-          <IconCard icon="🎁" title="Unique Souvenirs" items={souvenirs} color="purple" />
-        )}
       </div>
+
+      {/* See More Button */}
+      {!showExtended && (
+        <div className="text-center">
+          <button
+            onClick={fetchExtendedDetails}
+            disabled={loadingExtended}
+            className="bg-swiss-white border-6 border-swiss-black px-12 py-6 hover:bg-swiss-yellow transition-colors disabled:bg-swiss-gray-200 disabled:cursor-not-allowed relative group"
+          >
+            <div className="absolute top-0 left-0 w-8 h-2 bg-swiss-red" />
+            <span className="text-h4 font-bold text-swiss-black uppercase tracking-tight">
+              {loadingExtended ? 'Loading More Details...' : 'See More →'}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Extended Sections Grid */}
+      {showExtended && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {localLife.length > 0 && (
+            <IconCard icon="🌆" title="Local Life" items={localLife} color="blue" />
+          )}
+          {bestSights.length > 0 && (
+            <IconCard icon="📷" title="Best Sights" items={bestSights} color="red" />
+          )}
+          {culture.length > 0 && (
+            <IconCard icon="🎭" title="Culture" items={culture} color="purple" />
+          )}
+        </div>
+      )}
 
       {/* Quick Reference - Swiss Style */}
       <div className="bg-swiss-black border-6 border-swiss-black p-10 relative overflow-hidden">
