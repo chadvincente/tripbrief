@@ -183,20 +183,18 @@ export default function TravelBriefCheatsheet({
     }
 
     return (
-      <div className="bg-swiss-white border-3 border-swiss-black h-full relative group hover:bg-swiss-gray-50 transition-colors">
+      <div className="bg-swiss-white border border-swiss-gray-200 rounded-swiss-lg h-full relative group hover:shadow-swiss-md hover:border-swiss-gray-300 transition-all shadow-swiss">
         {/* Geometric accent element */}
         <div
-          className={`absolute top-0 right-0 w-16 h-16 ${accentColors[color as keyof typeof accentColors] || accentColors.blue} opacity-20`}
+          className={`absolute top-0 right-0 w-12 h-12 ${accentColors[color as keyof typeof accentColors] || accentColors.blue} opacity-10 rounded-tr-swiss-lg`}
           style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}
         />
 
         <div className="p-8">
           {/* Header with icon and title */}
-          <div className="flex items-start mb-6 pb-4 border-b-3 border-swiss-black">
+          <div className="flex items-start mb-6 pb-4 border-b border-swiss-gray-200">
             <span className="text-5xl mr-4 leading-none">{icon}</span>
-            <h3 className="text-h3 font-bold text-swiss-black uppercase tracking-tight leading-tight pt-2">
-              {title}
-            </h3>
+            <h3 className="text-h3 font-semibold text-swiss-black leading-tight pt-2">{title}</h3>
           </div>
 
           {/* List items */}
@@ -204,20 +202,20 @@ export default function TravelBriefCheatsheet({
             {items.slice(0, 6).map((item, index) => (
               <li
                 key={index}
-                className="text-body text-swiss-black leading-relaxed flex items-start"
+                className="text-body text-swiss-gray-700 leading-relaxed flex items-start"
               >
-                <span className="mr-3 text-swiss-red font-bold">■</span>
+                <span className="mr-3 text-swiss-blue font-bold text-sm">●</span>
                 <span className="flex-1">{item}</span>
               </li>
             ))}
             {items.length > 6 && (
-              <li className="text-body-sm text-swiss-gray-600 italic pt-2">
+              <li className="text-body-sm text-swiss-gray-500 italic pt-2">
                 {onSwitchToFullText ? (
                   <button
                     onClick={onSwitchToFullText}
-                    className="hover:text-swiss-blue font-semibold transition-colors uppercase tracking-wide"
+                    className="hover:text-swiss-blue font-medium transition-colors"
                   >
-                    +{items.length - 6} MORE →
+                    +{items.length - 6} more →
                   </button>
                 ) : (
                   `+${items.length - 6} more`
@@ -232,27 +230,25 @@ export default function TravelBriefCheatsheet({
 
   // Swiss style quick fact card
   const QuickFactCard = ({ title, content }: { title: string; content: string }) => (
-    <div className="bg-swiss-black p-6 relative overflow-hidden group hover:bg-swiss-blue transition-colors">
-      <div className="absolute bottom-0 right-0 w-12 h-12 bg-swiss-yellow opacity-30 group-hover:opacity-50 transition-opacity" />
-      <h4 className="font-bold text-caption text-swiss-white uppercase tracking-widest mb-3">
-        {title}
-      </h4>
-      <p className="text-body-lg text-swiss-white font-medium leading-relaxed">{content}</p>
+    <div className="bg-swiss-black rounded-swiss-lg p-6 relative overflow-hidden group hover:bg-swiss-gray-800 transition-colors shadow-swiss-md">
+      <div className="absolute bottom-0 right-0 w-12 h-12 bg-swiss-blue opacity-20 group-hover:opacity-30 transition-opacity rounded-br-swiss-lg" />
+      <h4 className="font-medium text-sm text-swiss-gray-300 mb-3">{title}</h4>
+      <p className="text-body-lg text-swiss-white font-normal leading-relaxed">{content}</p>
     </div>
   )
 
   return (
     <div className="space-y-12">
       {/* Swiss Style Hero Header */}
-      <div className="relative border-6 border-swiss-black bg-swiss-white overflow-hidden">
+      <div className="relative border border-swiss-gray-200 rounded-swiss-lg bg-swiss-white overflow-hidden shadow-swiss-lg">
         {/* Asymmetric background color block */}
-        <div className="absolute top-0 right-0 w-2/5 h-full bg-swiss-red opacity-10" />
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-swiss-blue opacity-5" />
+        <div className="absolute top-0 right-0 w-2/5 h-full bg-swiss-blue opacity-[0.03]" />
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-swiss-blue opacity-[0.02]" />
 
         {/* Background Image with blend mode */}
         {!imageLoading && cityImage && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-multiply"
+            className="absolute inset-0 bg-cover bg-center opacity-15 mix-blend-multiply"
             style={{
               backgroundImage: `url(${cityImage.url})`,
             }}
@@ -262,25 +258,25 @@ export default function TravelBriefCheatsheet({
         {/* Header Content - Swiss Typography */}
         <div className="relative z-10 p-12 md:p-16">
           <div className="max-w-4xl">
-            {/* Red accent bar */}
-            <div className="w-24 h-2 bg-swiss-red mb-8" />
+            {/* Accent bar */}
+            <div className="w-20 h-1 bg-swiss-blue mb-8" />
 
-            <h1 className="text-display font-bold text-swiss-black leading-none mb-6">
+            <h1 className="text-display font-bold text-swiss-black leading-none mb-6 uppercase">
               {brief.countryCode ? countryCodeToFlag(brief.countryCode) : '🌍'}
               <br />
-              {toTitleCase(brief.destination).toUpperCase()}
+              {toTitleCase(brief.destination)}
             </h1>
 
             {(data.travelMonth || (brief.startDate && brief.endDate)) && (
-              <p className="text-h4 font-medium text-swiss-gray-700 tracking-wide">
+              <p className="text-h4 font-normal text-swiss-gray-600">
                 {data.travelMonth || `${brief.startDate} — ${brief.endDate}`}
               </p>
             )}
           </div>
 
-          {/* Yellow geometric accent */}
+          {/* Geometric accent */}
           <div
-            className="absolute bottom-0 right-0 w-48 h-48 bg-swiss-yellow opacity-30"
+            className="absolute bottom-0 right-0 w-40 h-40 bg-swiss-blue opacity-5 rounded-br-swiss-lg"
             style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
           />
         </div>
@@ -312,11 +308,10 @@ export default function TravelBriefCheatsheet({
           <button
             onClick={fetchExtendedDetails}
             disabled={loadingExtended}
-            className="bg-swiss-white border-6 border-swiss-black px-12 py-6 hover:bg-swiss-yellow transition-colors disabled:bg-swiss-gray-200 disabled:cursor-not-allowed relative group"
+            className="bg-swiss-blue border border-swiss-blue text-swiss-white px-12 py-5 rounded-swiss hover:bg-swiss-blue-dark transition-all disabled:bg-swiss-gray-400 disabled:border-swiss-gray-400 disabled:cursor-not-allowed shadow-swiss-md hover:shadow-swiss-lg"
           >
-            <div className="absolute top-0 left-0 w-8 h-2 bg-swiss-red" />
-            <span className="text-h4 font-bold text-swiss-black uppercase tracking-tight">
-              {loadingExtended ? 'Loading More Details...' : 'See More →'}
+            <span className="text-lg font-semibold">
+              {loadingExtended ? 'Loading more details...' : 'See more →'}
             </span>
           </button>
         </div>
@@ -338,18 +333,18 @@ export default function TravelBriefCheatsheet({
       )}
 
       {/* Quick Reference - Swiss Style */}
-      <div className="bg-swiss-black border-6 border-swiss-black p-10 relative overflow-hidden">
+      <div className="bg-swiss-black rounded-swiss-lg p-10 relative overflow-hidden shadow-swiss-lg">
         {/* Geometric accent */}
-        <div className="absolute top-0 left-0 w-32 h-32 bg-swiss-yellow opacity-20" />
+        <div className="absolute top-0 left-0 w-24 h-24 bg-swiss-blue opacity-10 rounded-tl-swiss-lg" />
         <div
-          className="absolute bottom-0 right-0 w-48 h-48 bg-swiss-red opacity-10"
+          className="absolute bottom-0 right-0 w-40 h-40 bg-swiss-blue opacity-5 rounded-br-swiss-lg"
           style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}
         />
 
         <div className="relative z-10">
-          <h3 className="text-h2 font-bold text-swiss-white mb-8 uppercase tracking-tight flex items-center border-b-3 border-swiss-white pb-4">
-            <span className="mr-4 text-swiss-yellow">⚡</span>
-            Quick Reference
+          <h3 className="text-h2 font-semibold text-swiss-white mb-8 flex items-center border-b border-swiss-gray-700 pb-4">
+            <span className="mr-4 text-swiss-blue text-3xl">⚡</span>
+            Quick reference
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <QuickFactCard
@@ -369,11 +364,9 @@ export default function TravelBriefCheatsheet({
       </div>
 
       {/* Footer Note - Swiss Style */}
-      <div className="text-center border-t-3 border-swiss-black pt-8">
-        <p className="text-caption text-swiss-gray-600 uppercase tracking-widest font-semibold">
-          Generated by TripBrief
-        </p>
-        <p className="text-body-sm text-swiss-gray-500 mt-2">
+      <div className="text-center border-t border-swiss-gray-200 pt-8">
+        <p className="text-sm text-swiss-gray-600 font-medium">Generated by TripBrief</p>
+        <p className="text-sm text-swiss-gray-500 mt-2">
           Double-check current information before traveling
         </p>
       </div>

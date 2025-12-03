@@ -64,10 +64,10 @@ export default function MonthSelector({
             key={month.value}
             type="button"
             onClick={() => handleMonthClick(month.value)}
-            className={`px-3 py-2 md:px-4 md:py-3 text-sm font-semibold transition-all duration-200 border-3 uppercase tracking-wide ${
+            className={`px-3 py-2 md:px-4 md:py-3 text-sm font-medium transition-all duration-200 border rounded-swiss ${
               selectedMonth === month.value
-                ? 'bg-swiss-blue text-swiss-white border-swiss-blue'
-                : 'bg-swiss-white text-swiss-black border-swiss-black hover:bg-swiss-yellow hover:border-swiss-black'
+                ? 'bg-swiss-blue text-swiss-white border-swiss-blue shadow-swiss'
+                : 'bg-swiss-white text-swiss-gray-700 border-swiss-gray-300 hover:bg-swiss-gray-50 hover:border-swiss-gray-400'
             }`}
             title={month.fullLabel}
           >
@@ -81,7 +81,7 @@ export default function MonthSelector({
         <button
           type="button"
           onClick={() => handleMonthClick(selectedMonth)}
-          className={`text-body-sm font-medium text-swiss-gray-600 hover:text-swiss-blue transition-colors uppercase tracking-wide ${
+          className={`text-sm font-medium text-swiss-gray-500 hover:text-swiss-blue transition-colors ${
             selectedMonth ? 'visible' : 'invisible'
           }`}
         >
