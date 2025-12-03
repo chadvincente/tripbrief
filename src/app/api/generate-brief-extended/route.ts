@@ -3,8 +3,15 @@ import Anthropic from '@anthropic-ai/sdk'
 import { checkRateLimit } from '@/lib/rate-limit'
 import type { ExtendedTravelBrief } from '@/lib/anthropic'
 
+// Validate API key at startup
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error('ANTHROPIC_API_KEY is not set. Please add it to your environment variables.')
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 30000, // 30 second timeout
+  maxRetries: 2, // Retry failed requests up to 2 times
 })
 
 export async function POST(request: NextRequest) {
@@ -29,19 +36,32 @@ export async function POST(request: NextRequest) {
 
     const { destination, countryCode, travelMonth } = await request.json()
 
-    if (!destination) {
+    // Input validation
+    if (!destination || typeof destination !== 'string') {
       return NextResponse.json({ error: 'City is required' }, { status: 400 })
+    }
+
+    const trimmedDestination = destination.trim()
+    if (trimmedDestination.length === 0) {
+      return NextResponse.json({ error: 'City cannot be empty' }, { status: 400 })
+    }
+
+    if (trimmedDestination.length > 100) {
+      return NextResponse.json(
+        { error: 'City name is too long (max 100 characters)' },
+        { status: 400 }
+      )
     }
 
     // Log the request for monitoring
     console.log(
-      `Extended travel brief request: ${destination} from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`
+      `Extended travel brief request: ${trimmedDestination} from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`
     )
 
     // Build prompt for extended details
     const timeCtx = travelMonth || 'anytime'
 
-    const prompt = `Create extended travel information for ${destination} (${timeCtx}).
+    const prompt = `Create extended travel information for ${trimmedDestination} (${timeCtx}).
 
 CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact format:
 
@@ -141,17 +161,19 @@ Keep responses practical and specific. Skip generic advice.`
       fullText: content.text, // Also return the raw text for debugging
     })
   } catch (error) {
+    // Log full error details server-side for debugging
     console.error('❌ Error generating extended travel brief:', error)
 
     if (error instanceof Error) {
       console.error('Error details:', error.message)
+      console.error('Stack trace:', error.stack)
     }
 
+    // Only return generic error message to user (don't expose internal details)
     return NextResponse.json(
       {
         error:
           "Sorry, we've hit a temporary snag. Please give it another shot, or try again later.",
-        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

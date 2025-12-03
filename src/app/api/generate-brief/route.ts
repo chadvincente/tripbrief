@@ -3,8 +3,15 @@ import Anthropic from '@anthropic-ai/sdk'
 import { checkRateLimit } from '@/lib/rate-limit'
 import type { CategoryOptions, BudgetOption } from '@/lib/anthropic'
 
+// Validate API key at startup
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error('ANTHROPIC_API_KEY is not set. Please add it to your environment variables.')
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 30000, // 30 second timeout
+  maxRetries: 2, // Retry failed requests up to 2 times
 })
 
 export async function POST(request: NextRequest) {
@@ -36,8 +43,27 @@ export async function POST(request: NextRequest) {
       budget = 'standard',
     } = await request.json()
 
-    if (!destination) {
+    // Input validation
+    if (!destination || typeof destination !== 'string') {
       return NextResponse.json({ error: 'City is required' }, { status: 400 })
+    }
+
+    const trimmedDestination = destination.trim()
+    if (trimmedDestination.length === 0) {
+      return NextResponse.json({ error: 'City cannot be empty' }, { status: 400 })
+    }
+
+    if (trimmedDestination.length > 100) {
+      return NextResponse.json(
+        { error: 'City name is too long (max 100 characters)' },
+        { status: 400 }
+      )
+    }
+
+    // Validate budget option
+    const validBudgets = ['budget-friendly', 'standard', 'luxury']
+    if (budget && !validBudgets.includes(budget)) {
+      return NextResponse.json({ error: 'Invalid budget option' }, { status: 400 })
     }
 
     // Log the request for monitoring
@@ -47,7 +73,7 @@ export async function POST(request: NextRequest) {
         ? `${startDate} to ${endDate}`
         : 'general'
     console.log(
-      `Travel brief request: ${destination} (${timeContext}) from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`
+      `Travel brief request: ${trimmedDestination} (${timeContext}) from IP: ${request.headers.get('x-forwarded-for') || 'unknown'}`
     )
 
     // Build concise prompt with custom format (not JSON)
@@ -61,7 +87,7 @@ export async function POST(request: NextRequest) {
       const timeCtx =
         travelMonth || (startDate && endDate ? `${startDate} to ${endDate}` : 'anytime')
 
-      let prompt = `Create a brief travel guide for ${destination} (${timeCtx}).
+      let prompt = `Create a brief travel guide for ${trimmedDestination} (${timeCtx}).
 Budget: ${budget.toUpperCase()} - ${budgetInstructions[budget as keyof typeof budgetInstructions]}
 
 REQUIRED FORMAT - Start with these exact lines first:
@@ -183,7 +209,7 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
     // Parse custom format into structured data
     const parseResponse = (text: string) => {
       const sections: any = {
-        destination,
+        destination: trimmedDestination,
         startDate,
         endDate,
       }
@@ -196,7 +222,7 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
         sections.destination = cityMatch[1].trim()
         console.log('✅ Extracted city name:', sections.destination)
       } else {
-        console.log('❌ No city name found, using original:', destination)
+        console.log('❌ No city name found, using original:', trimmedDestination)
       }
 
       const countryMatch = text.match(/Country:\s*([A-Z]{2})/i)
@@ -306,24 +332,26 @@ CRITICAL: Keep it concise! 3-5 bullet points per section maximum. Use this exact
 
     return NextResponse.json({
       structuredData,
-      destination,
+      destination: trimmedDestination,
       startDate,
       endDate,
       travelMonth, // Include travel month for display
       fullText: content.text, // Also return the raw text for debugging
     })
   } catch (error) {
+    // Log full error details server-side for debugging
     console.error('❌ Error generating travel brief:', error)
 
     if (error instanceof Error) {
       console.error('Error details:', error.message)
+      console.error('Stack trace:', error.stack)
     }
 
+    // Only return generic error message to user (don't expose internal details)
     return NextResponse.json(
       {
         error:
           "Sorry, we've hit a temporary snag. Please give it another shot, or try again later.",
-        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )
