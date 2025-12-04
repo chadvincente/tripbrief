@@ -210,17 +210,17 @@ export default function TravelMap({ data }: TravelMapProps) {
 
   if (loadError) {
     return (
-      <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded">
-        Error loading Google Maps. Please check your API key configuration.
+      <div className="bg-swiss-red bg-opacity-5 border border-swiss-red border-opacity-30 text-swiss-red px-6 py-4 rounded-swiss-lg">
+        <p className="font-medium">Unable to load map at this time. Please try again later.</p>
       </div>
     )
   }
 
   if (!isLoaded || isGeocodingLoading || isLoadingPlaces) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-        <span className="text-gray-600 dark:text-gray-300">
+      <div className="bg-swiss-gray-50 border border-swiss-gray-200 rounded-swiss-lg p-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-swiss-blue mr-3"></div>
+        <span className="text-swiss-gray-600 font-medium">
           {!isLoaded
             ? 'Loading map...'
             : isGeocodingLoading
@@ -236,47 +236,46 @@ export default function TravelMap({ data }: TravelMapProps) {
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === 'your_google_maps_api_key_here'
   ) {
     return (
-      <div className="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded">
-        <h3 className="font-semibold mb-2">🗺️ Map Feature Coming Soon!</h3>
-        <p className="text-sm">To enable the interactive map with location markers, please:</p>
-        <ol className="text-sm mt-2 ml-4 list-decimal">
-          <li>Get a Google Maps API key from Google Cloud Console</li>
-          <li>Add it to your .env.local file as NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</li>
-          <li>Restart the development server</li>
-        </ol>
+      <div className="bg-swiss-blue bg-opacity-5 border border-swiss-blue border-opacity-20 rounded-swiss-lg p-8 text-center">
+        <div className="text-5xl mb-4">🗺️</div>
+        <h3 className="text-h3 font-semibold text-swiss-black mb-3">Interactive Map</h3>
+        <p className="text-swiss-gray-600 max-w-md mx-auto">
+          The interactive map feature is currently unavailable. View your travel brief in Cheatsheet
+          or Full Text mode for complete destination information.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+    <div className="bg-swiss-white border border-swiss-gray-200 rounded-swiss-lg shadow-swiss-md p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-h3 font-semibold text-swiss-black flex items-center">
           <span className="mr-2">🗺️</span>
           Interactive Map
         </h3>
-        <div className="text-sm text-gray-600 dark:text-gray-300">
+        <div className="text-sm text-swiss-gray-600 font-medium">
           {markers.length} locations marked
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 mb-4 text-sm">
+      <div className="flex flex-wrap gap-6 mb-6 text-sm">
         <div className="flex items-center">
-          <span className="mr-1">📸</span>
-          <span className="text-gray-600 dark:text-gray-300">Attractions</span>
+          <span className="mr-2">📸</span>
+          <span className="text-swiss-gray-600 font-medium">Attractions</span>
         </div>
         <div className="flex items-center">
-          <span className="mr-1">🍽️</span>
-          <span className="text-gray-600 dark:text-gray-300">Restaurants</span>
+          <span className="mr-2">🍽️</span>
+          <span className="text-swiss-gray-600 font-medium">Restaurants</span>
         </div>
         <div className="flex items-center">
-          <span className="mr-1">🗺️</span>
-          <span className="text-gray-600 dark:text-gray-300">Day Trips</span>
+          <span className="mr-2">🗺️</span>
+          <span className="text-swiss-gray-600 font-medium">Day Trips</span>
         </div>
       </div>
 
-      <div className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600">
+      <div className="rounded-swiss-lg overflow-hidden border border-swiss-gray-300">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={center}
@@ -319,10 +318,7 @@ export default function TravelMap({ data }: TravelMapProps) {
         </GoogleMap>
       </div>
 
-      <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-        📍 Map centered on {data.destination}. Locations powered by Google Places API for accurate
-        positioning.
-      </div>
+      <div className="mt-4 text-sm text-swiss-gray-500">📍 Map centered on {data.destination}</div>
     </div>
   )
 }
